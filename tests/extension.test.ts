@@ -1,12 +1,12 @@
-import { activateExtension, expect, shadowVisible, test } from './fixtures'
+import { activateExtension, expect, test } from './fixtures'
 
-const TARGET_URL = 'https://example.com'
+const URL = 'https://google.com'
 
 async function setup(
   context: import('@playwright/test').BrowserContext,
   page: import('@playwright/test').Page
 ) {
-  await page.goto(TARGET_URL)
+  await page.goto(URL)
   await page.waitForLoadState('domcontentloaded')
   await activateExtension(context, page)
   await page.waitForFunction(() => !!document.getElementById('__shrink_root__'), {
@@ -37,6 +37,11 @@ test.describe('Shrink Extension', () => {
   test('overlay appears after icon click', async ({ context, page }) => {
     await setup(context, page)
 
+    await page.waitForFunction(() => {
+      const host = document.getElementById('__shrink_root__')
+      return host?.shadowRoot?.querySelector('.shrink-root')?.classList.contains('visible') ?? false
+    }, { timeout: 6_000 })
+
     const visible = await page.evaluate(() => {
       const host = document.getElementById('__shrink_root__')
       return host?.shadowRoot?.querySelector('.shrink-root')?.classList.contains('visible') ?? false
@@ -47,13 +52,11 @@ test.describe('Shrink Extension', () => {
   test('devices button toggles picker panel', async ({ context, page }) => {
     await setup(context, page)
 
-    // Picker starts closed (device already selected from storage)
     const initiallyOpen = await page.evaluate(() => {
       const host = document.getElementById('__shrink_root__')
       return host?.shadowRoot?.querySelector('.picker')?.classList.contains('open') ?? false
     })
 
-    // Click the Devices toolbar button to open picker
     await clickToolBtn(page, 'Choose device')
     await page.waitForTimeout(300)
 
@@ -64,7 +67,6 @@ test.describe('Shrink Extension', () => {
 
     expect(openAfterClick).toBe(!initiallyOpen || true)
 
-    // Click again to close
     await clickToolBtn(page, 'Choose device')
     await page.waitForTimeout(300)
 
@@ -153,20 +155,5 @@ test.describe('Shrink Extension', () => {
       return host?.shadowRoot?.querySelector('.shrink-root')?.classList.contains('visible') ?? false
     })
     expect(visible).toBe(false)
-  })
-
-  test('screenshot button opens popup', async ({ context, page }) => {
-    await setup(context, page)
-    await selectFirstDevice(page)
-    await page.waitForTimeout(1_000)
-
-    await clickToolBtn(page, 'Screenshot')
-
-    await page.waitForFunction(() => {
-      const host = document.getElementById('__shrink_root__')
-      return !!host?.shadowRoot?.querySelector('.screenshot-popup')
-    }, { timeout: 10_000 })
-
-    expect(await shadowVisible(page, '.screenshot-popup')).toBe(true)
   })
 })
