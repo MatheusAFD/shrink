@@ -18,6 +18,8 @@ export class FrameView {
 
   private currentState: ActiveState | null = null
   private lastDimsKey = ''
+  private lastOrientation: 'portrait' | 'landscape' | null = null
+  private rotateTimeoutId: number | undefined
   private readonly resizeHandler: () => void
 
   constructor(container: HTMLElement) {
@@ -66,6 +68,7 @@ export class FrameView {
 
   show(url: string, state: ActiveState): void {
     this.currentState = state
+    this.lastOrientation = state.orientation
     this.applyDimensions(state)
     this.fallback.classList.remove('visible')
 
@@ -87,14 +90,31 @@ export class FrameView {
 
   hide(): void {
     this.currentState = null
+    this.lastOrientation = null
     window.clearTimeout(this.fallbackTimeoutId)
+    window.clearTimeout(this.rotateTimeoutId)
+    this.deviceFrame.classList.remove('rotating')
     this.iframe.src = 'about:blank'
     this.fallback.classList.remove('visible')
   }
 
   update(state: ActiveState): void {
+    const orientationChanged = this.lastOrientation !== null && this.lastOrientation !== state.orientation
     this.currentState = state
-    this.applyDimensions(state)
+
+    if (orientationChanged) {
+      window.clearTimeout(this.rotateTimeoutId)
+      this.deviceFrame.classList.add('rotating')
+      this.rotateTimeoutId = window.setTimeout(() => {
+        this.lastDimsKey = ''
+        this.applyDimensions(state)
+        this.deviceFrame.classList.remove('rotating')
+      }, 190)
+    } else {
+      this.applyDimensions(state)
+    }
+
+    this.lastOrientation = state.orientation
     const src = this.iframe.src
     if (src && src !== 'about:blank') this.iframe.src = src
   }
