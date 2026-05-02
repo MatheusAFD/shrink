@@ -42,7 +42,6 @@ export class ShrinkApp {
           browserMode
         } satisfies Msg)
       },
-      onScreenshot: () => this.takeScreenshot(),
       onRotate: () => {
         void browser.runtime.sendMessage({
           type: 'CONTENT_TOGGLE_ORIENTATION'
@@ -87,76 +86,6 @@ export class ShrinkApp {
         this.frame.update(msg.state)
         break
     }
-  }
-
-  private takeScreenshot(): void {
-    void browser.runtime.sendMessage({
-      type: 'CONTENT_SCREENSHOT'
-    } satisfies Msg).then((res) => {
-      if (!res?.ok || !('data' in res)) return
-      this.showScreenshotPopup(res.data as string)
-    })
-  }
-
-  private showScreenshotPopup(base64: string): void {
-    const existing = this.shrinkRoot.querySelector('.screenshot-popup')
-    if (existing) existing.remove()
-
-    const overlay = document.createElement('div')
-    overlay.className = 'screenshot-popup'
-
-    const dismiss = () => overlay.remove()
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) dismiss()
-    })
-
-    const box = document.createElement('div')
-    box.className = 'screenshot-box'
-
-    const preview = document.createElement('img')
-    preview.src = `data:image/png;base64,${base64}`
-    preview.className = 'screenshot-preview'
-    box.appendChild(preview)
-
-    const actions = document.createElement('div')
-    actions.className = 'screenshot-actions'
-
-    const copyBtn = document.createElement('button')
-    copyBtn.className = 'screenshot-btn'
-    copyBtn.textContent = 'Copy'
-    copyBtn.addEventListener('click', async () => {
-      try {
-        const blob = await fetch(`data:image/png;base64,${base64}`).then((r) =>
-          r.blob()
-        )
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
-        ])
-        copyBtn.textContent = 'Copied!'
-        setTimeout(() => {
-          copyBtn.textContent = 'Copy'
-        }, 1500)
-      } catch {
-        copyBtn.textContent = 'Failed'
-      }
-    })
-    actions.appendChild(copyBtn)
-
-    const saveBtn = document.createElement('button')
-    saveBtn.className = 'screenshot-btn primary'
-    saveBtn.textContent = 'Save'
-    saveBtn.addEventListener('click', () => {
-      const a = document.createElement('a')
-      a.href = `data:image/png;base64,${base64}`
-      a.download = `shrink-${Date.now()}.png`
-      a.click()
-      dismiss()
-    })
-    actions.appendChild(saveBtn)
-
-    box.appendChild(actions)
-    overlay.appendChild(box)
-    this.shrinkRoot.appendChild(overlay)
   }
 
   private showFrame(url: string, state: ActiveState): void {

@@ -186,42 +186,4 @@ export const STYLE = `
     pointer-events: all;
   }
   .fallback.visible { display: block; }
-
-  .screenshot-popup {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.72);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 20; pointer-events: all;
-  }
-  .screenshot-box {
-    background: ${COLORS.bgElevated};
-    border: 1px solid ${COLORS.border};
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex; flex-direction: column;
-    max-width: 340px; width: 90%;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
-  }
-  .screenshot-preview {
-    display: block; width: 100%; height: auto;
-    max-height: 260px; object-fit: contain;
-    background: ${COLORS.bg};
-  }
-  .screenshot-actions {
-    display: flex; gap: 8px;
-    padding: 12px;
-  }
-  .screenshot-btn {
-    all: unset; cursor: pointer; flex: 1; text-align: center;
-    font-size: 12px; font-weight: 500;
-    padding: 8px 12px; border-radius: 7px;
-    color: ${COLORS.textSecondary};
-    background: ${COLORS.bgSubtle}; border: 1px solid ${COLORS.border};
-    transition: background 120ms, color 120ms;
-  }
-  .screenshot-btn:hover { background: ${COLORS.border}; color: ${COLORS.textPrimary}; }
-  .screenshot-btn.primary {
-    background: ${COLORS.accent}; color: #000; border-color: transparent;
-  }
-  .screenshot-btn.primary:hover { opacity: 0.88; }
 `

@@ -11,7 +11,6 @@ export type Msg =
   | { type: 'CONTENT_TOGGLE_ORIENTATION' }
   | { type: 'CONTENT_SET_BROWSER'; browserMode: BrowserMode }
   | { type: 'CONTENT_GET_STATE' }
-  | { type: 'CONTENT_SCREENSHOT' }
   | { type: 'CONTENT_READY' }
   | { type: 'OPEN_SIDEBAR'; state: ActiveState | null }
   | {
@@ -28,4 +27,3 @@ export type MsgResponse =
   | { ok: true }
   | { ok: false; error: string }
   | { ok: true; state: ActiveState | null }
-  | { ok: true; data: string }

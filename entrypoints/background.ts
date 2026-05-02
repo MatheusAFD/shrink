@@ -133,32 +133,6 @@ async function handle(
       return { ok: true }
     }
 
-    case 'CONTENT_SCREENSHOT': {
-      const tabId = sender.tab?.id
-      if (tabId == null) return { ok: false, error: 'no sender tab' }
-      if (!activeByTab.has(tabId)) return { ok: false, error: 'tab not active' }
-      try {
-        const result = await new Promise<{ data: string }>((resolve, reject) => {
-          browser.debugger.sendCommand(
-            { tabId },
-            'Page.captureScreenshot',
-            { format: 'png' },
-            (res) => {
-              const err = browser.runtime.lastError
-              if (err) {
-                reject(new Error(err.message))
-                return
-              }
-              resolve(res as { data: string })
-            }
-          )
-        })
-        return { ok: true, data: result.data }
-      } catch (e) {
-        return { ok: false, error: (e as Error).message }
-      }
-    }
-
     case 'CONTENT_GET_STATE': {
       const tabId = sender.tab?.id
       if (tabId == null) return { ok: false, error: 'no sender tab' }

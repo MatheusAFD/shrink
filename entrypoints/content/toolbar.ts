@@ -1,12 +1,11 @@
 import { BROWSER_MODES } from '@/lib/constants/ui'
 import { isSafariUnsupported } from '@/lib/user-agent'
 import type { ActiveState, BrowserMode } from '@/types'
-import { ICON_CAMERA, ICON_DEVICES, ICON_ROTATE, ICON_STOP } from './icons'
+import { ICON_DEVICES, ICON_ROTATE, ICON_STOP } from './icons'
 
 export interface ToolbarCallbacks {
   onTogglePicker: () => void
   onSetBrowser: (mode: BrowserMode) => void
-  onScreenshot: () => void
   onRotate: () => void
   onStop: () => void
 }
@@ -42,13 +41,6 @@ export class Toolbar {
     toolbar.appendChild(browserGroup)
 
     toolbar.appendChild(createDivider())
-
-    const screenshotBtn = document.createElement('button')
-    screenshotBtn.className = 'tool-btn'
-    screenshotBtn.title = 'Screenshot'
-    screenshotBtn.innerHTML = `${ICON_CAMERA}<span class="tool-btn-label">Shot</span>`
-    screenshotBtn.addEventListener('click', callbacks.onScreenshot)
-    toolbar.appendChild(screenshotBtn)
 
     const rotateBtn = document.createElement('button')
     rotateBtn.className = 'tool-btn'
