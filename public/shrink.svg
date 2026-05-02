@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#18181b"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </linearGradient>
+    <linearGradient id="frame-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3f3f46"/>
+      <stop offset="100%" stop-color="#27272a"/>
+    </linearGradient>
+    <linearGradient id="s-grad" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- App icon background -->
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+
+  <!-- Phone frame outer -->
+  <rect x="34" y="10" width="60" height="108" rx="16" fill="url(#frame-grad)"/>
+  <!-- Subtle edge highlight -->
+  <rect x="34" y="10" width="60" height="108" rx="16"
+        fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+
+  <!-- Screen -->
+  <rect x="39" y="22" width="50" height="84" rx="8" fill="#000"/>
+
+  <!-- Dynamic island notch -->
+  <rect x="55" y="25.5" width="18" height="5" rx="2.5" fill="#1a1a1d"/>
+
+  <!-- Home indicator -->
+  <rect x="51" y="101" width="26" height="3" rx="1.5" fill="#3f3f46"/>
+
+  <!-- Letter S — screen center x=64, screen usable y≈33..98, optical center y≈65 -->
+  <path
+    d="
+      M 72,52
+      C 72,44 52,42 52,52
+      C 52,62 72,60 72,70
+      C 72,80 52,78 52,70
+    "
+    fill="none"
+    stroke="url(#s-grad)"
+    stroke-width="7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
