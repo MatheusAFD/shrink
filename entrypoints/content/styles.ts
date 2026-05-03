@@ -168,7 +168,8 @@ export const STYLE = `
     display: flex; align-items: center; justify-content: center;
   }
 
-  .device-frame { position: relative; flex-shrink: 0; }
+  .device-frame { position: relative; flex-shrink: 0; transition: transform 380ms cubic-bezier(0.4,0,0.2,1); }
+  .device-frame.rotating { transform: rotate(90deg) scale(0.92); }
 
   .screen-inner {
     position: absolute; overflow: hidden;
