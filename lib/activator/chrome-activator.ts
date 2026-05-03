@@ -16,14 +16,19 @@ export class ChromeActivator implements Activator {
     params?: Record<string, unknown>
   ): Promise<T> {
     return new Promise((resolve, reject) => {
-      browser.debugger.sendCommand({ tabId }, method, params ?? {}, (result) => {
-        const err = browser.runtime.lastError
-        if (err) {
-          reject(new Error(`${method}: ${err.message}`))
-          return
+      browser.debugger.sendCommand(
+        { tabId },
+        method,
+        params ?? {},
+        (result) => {
+          const err = browser.runtime.lastError
+          if (err) {
+            reject(new Error(`${method}: ${err.message}`))
+            return
+          }
+          resolve(result as T)
         }
-        resolve(result as T)
-      })
+      )
     })
   }
 
@@ -43,7 +48,10 @@ export class ChromeActivator implements Activator {
     await this.send(tabId, 'Page.enable')
   }
 
-  private async applyOverrides(tabId: number, state: ActiveState): Promise<void> {
+  private async applyOverrides(
+    tabId: number,
+    state: ActiveState
+  ): Promise<void> {
     const { device, orientation, browserMode } = state
 
     await this.send(tabId, 'Emulation.setDeviceMetricsOverride', {
@@ -52,7 +60,8 @@ export class ChromeActivator implements Activator {
       deviceScaleFactor: device.dpr,
       mobile: device.category === 'smartphone',
       screenOrientation: {
-        type: orientation === 'landscape' ? 'landscapePrimary' : 'portraitPrimary',
+        type:
+          orientation === 'landscape' ? 'landscapePrimary' : 'portraitPrimary',
         angle: orientation === 'landscape' ? 90 : 0
       }
     })
@@ -70,8 +79,12 @@ export class ChromeActivator implements Activator {
   private async clearOverrides(tabId: number): Promise<void> {
     try {
       await this.send(tabId, 'Emulation.clearDeviceMetricsOverride')
-      await this.send(tabId, 'Emulation.setUserAgentOverride', { userAgent: '' })
-      await this.send(tabId, 'Emulation.setTouchEmulationEnabled', { enabled: false })
+      await this.send(tabId, 'Emulation.setUserAgentOverride', {
+        userAgent: ''
+      })
+      await this.send(tabId, 'Emulation.setTouchEmulationEnabled', {
+        enabled: false
+      })
     } catch {}
   }
 

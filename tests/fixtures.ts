@@ -1,7 +1,15 @@
 import path from 'node:path'
-import { type BrowserContext, type Page, chromium, test as base } from '@playwright/test'
+import {
+  type BrowserContext,
+  test as base,
+  chromium,
+  type Page
+} from '@playwright/test'
 
-const EXTENSION_PATH = path.resolve(import.meta.dirname, '../.output/chrome-mv3')
+const EXTENSION_PATH = path.resolve(
+  import.meta.dirname,
+  '../.output/chrome-mv3'
+)
 
 type ExtensionFixtures = {
   context: BrowserContext
@@ -38,8 +46,7 @@ export async function activateExtension(
   _page: Page
 ): Promise<void> {
   const sw =
-    context.serviceWorkers()[0] ??
-    (await context.waitForEvent('serviceworker'))
+    context.serviceWorkers()[0] ?? (await context.waitForEvent('serviceworker'))
 
   const tabId = await sw.evaluate(async () => {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
@@ -56,7 +63,10 @@ export async function activateExtension(
   }, tabId)
 }
 
-export async function shadowVisible(page: Page, selector: string): Promise<boolean> {
+export async function shadowVisible(
+  page: Page,
+  selector: string
+): Promise<boolean> {
   return page.evaluate((sel) => {
     const host = document.getElementById('__shrink_root__')
     const el = host?.shadowRoot?.querySelector(sel) as HTMLElement | null

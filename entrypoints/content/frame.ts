@@ -61,7 +61,9 @@ export class FrameView {
     this.fallback = fallback
 
     this.resizeHandler = () => {
-      if (this.currentState) this.applyDimensions(this.currentState)
+      if (this.currentState) {
+        this.applyDimensions(this.currentState)
+      }
     }
     window.addEventListener('resize', this.resizeHandler)
   }
@@ -99,24 +101,34 @@ export class FrameView {
   }
 
   update(state: ActiveState): void {
-    const orientationChanged = this.lastOrientation !== null && this.lastOrientation !== state.orientation
+    const orientationChanged =
+      this.lastOrientation !== null &&
+      this.lastOrientation !== state.orientation
     this.currentState = state
 
-    if (orientationChanged) {
-      window.clearTimeout(this.rotateTimeoutId)
-      this.deviceFrame.classList.add('rotating')
-      this.rotateTimeoutId = window.setTimeout(() => {
-        this.lastDimsKey = ''
-        this.applyDimensions(state)
-        this.deviceFrame.classList.remove('rotating')
-      }, 190)
-    } else {
+    if (!orientationChanged) {
       this.applyDimensions(state)
+      this.lastOrientation = state.orientation
+      const src = this.iframe.src
+      if (src && src !== 'about:blank') {
+        this.iframe.src = src
+      }
+      return
     }
+
+    window.clearTimeout(this.rotateTimeoutId)
+    this.deviceFrame.classList.add('rotating')
+    this.rotateTimeoutId = window.setTimeout(() => {
+      this.lastDimsKey = ''
+      this.applyDimensions(state)
+      this.deviceFrame.classList.remove('rotating')
+    }, 190)
 
     this.lastOrientation = state.orientation
     const src = this.iframe.src
-    if (src && src !== 'about:blank') this.iframe.src = src
+    if (src && src !== 'about:blank') {
+      this.iframe.src = src
+    }
   }
 
   private applyDimensions(state: ActiveState): void {
@@ -126,7 +138,9 @@ export class FrameView {
 
     const { maxW, maxH } = computeMaxFrameSize()
     const dimsKey = `${device.id}:${orientation}:${maxW}:${maxH}`
-    if (dimsKey === this.lastDimsKey) return
+    if (dimsKey === this.lastDimsKey) {
+      return
+    }
     this.lastDimsKey = dimsKey
 
     const dims = getFrameDimensions(device, orientation)
@@ -141,19 +155,8 @@ export class FrameView {
     this.screenInner.style.cssText = `${stylesToString(screen)};`
     this.topBar.style.cssText = stylesToString(topBar)
 
-    if (camera) {
-      this.camera.style.cssText = stylesToString(camera)
-      this.camera.style.display = ''
-    } else {
-      this.camera.style.display = 'none'
-    }
-
-    if (homeIndicator) {
-      this.homeIndicator.style.cssText = stylesToString(homeIndicator)
-      this.homeIndicator.style.display = ''
-    } else {
-      this.homeIndicator.style.display = 'none'
-    }
+    applyOptionalStyle(this.camera, camera)
+    applyOptionalStyle(this.homeIndicator, homeIndicator)
 
     this.iframe.style.cssText = `display:block;border:0;width:${w}px;height:${h}px;transform:scale(${scale});transform-origin:top left;`
   }
@@ -164,4 +167,16 @@ function computeMaxFrameSize(): { maxW: number; maxH: number } {
     maxW: window.innerWidth - 40,
     maxH: window.innerHeight * 0.88
   }
+}
+
+function applyOptionalStyle(
+  el: HTMLElement,
+  style: Record<string, string> | null | undefined
+): void {
+  if (!style) {
+    el.style.display = 'none'
+    return
+  }
+  el.style.cssText = stylesToString(style)
+  el.style.display = ''
 }

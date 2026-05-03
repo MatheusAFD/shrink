@@ -80,7 +80,8 @@ export function buildFrameStyles(dims: FrameDimensions, scale = 1) {
     position: 'relative',
     width: `${fw}px`,
     height: `${fh}px`,
-    background: 'linear-gradient(160deg, #3a3a3c 0%, #1c1c1e 40%, #2a2a2c 100%)',
+    background:
+      'linear-gradient(160deg, #3a3a3c 0%, #1c1c1e 40%, #2a2a2c 100%)',
     borderRadius: `${r}px`,
     boxShadow: `0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.12), 0 24px 64px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.5)`,
     overflow: 'hidden',

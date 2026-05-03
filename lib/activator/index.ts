@@ -10,14 +10,18 @@ export interface Activator {
 let cached: Activator | null = null
 
 export async function getActivator(): Promise<Activator> {
-  if (cached) return cached
+  if (cached) {
+    return cached
+  }
+
   const browser = import.meta.env.BROWSER
   if (browser === 'firefox') {
     const { FirefoxActivator } = await import('./firefox-activator')
     cached = new FirefoxActivator()
-  } else {
-    const { ChromeActivator } = await import('./chrome-activator')
-    cached = new ChromeActivator()
+    return cached
   }
+
+  const { ChromeActivator } = await import('./chrome-activator')
+  cached = new ChromeActivator()
   return cached
 }

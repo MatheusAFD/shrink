@@ -92,13 +92,10 @@ export class Toolbar {
     for (const mode of BROWSER_MODES) {
       const btn = this.browserBtns[mode]
       btn.classList.toggle('active', mode === state.browserMode)
-      if (mode === 'safari' && isSafariUnsupported(state.device)) {
-        btn.title = 'Safari unavailable on Android'
-        btn.disabled = true
-      } else {
-        btn.title = ''
-        btn.disabled = false
-      }
+      const safariUnsupported =
+        mode === 'safari' && isSafariUnsupported(state.device)
+      btn.title = safariUnsupported ? 'Safari unavailable on Android' : ''
+      btn.disabled = safariUnsupported
     }
   }
 

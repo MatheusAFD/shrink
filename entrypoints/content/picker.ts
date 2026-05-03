@@ -99,8 +99,11 @@ export class DevicePicker {
   }
 
   toggle(): void {
-    if (this.isOpen) this.close()
-    else this.open()
+    if (this.isOpen) {
+      this.close()
+      return
+    }
+    this.open()
   }
 
   get opened(): boolean {
@@ -123,10 +126,14 @@ export class DevicePicker {
         const match =
           !q || entry.nameLC.includes(q) || entry.brandLC.includes(q)
         entry.el.style.display = match ? '' : 'none'
-        if (match) brandVisible = true
+        if (match) {
+          brandVisible = true
+        }
       }
       section.style.display = brandVisible ? '' : 'none'
-      if (brandVisible) anyVisible = true
+      if (brandVisible) {
+        anyVisible = true
+      }
     }
 
     this.noResultsEl.style.display = anyVisible ? 'none' : ''
@@ -142,7 +149,9 @@ export class DevicePicker {
 
     for (const brand of BRAND_ORDER) {
       const list = grouped.get(brand)
-      if (!list || list.length === 0) continue
+      if (!list || list.length === 0) {
+        continue
+      }
 
       const section = document.createElement('div')
 

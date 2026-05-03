@@ -15,5 +15,5 @@ export const COLORS = {
   frameBg2: '#1c1c1e',
   frameBg3: '#2a2a2c',
   frameCamera: '#18181b',
-  frameScreen: '#000',
+  frameScreen: '#000'
 } as const

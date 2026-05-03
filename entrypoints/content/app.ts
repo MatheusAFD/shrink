@@ -66,12 +66,16 @@ export class ShrinkApp {
     switch (msg.type) {
       case 'OPEN_SIDEBAR': {
         this.updateState(msg.state)
-        if (!this.activeState) this.openPicker()
+        if (!this.activeState) {
+          this.openPicker()
+        }
         break
       }
       case 'STATE_CHANGED': {
         this.updateState(msg.active && msg.state ? msg.state : null)
-        if (!msg.active) this.hideFrame()
+        if (!msg.active) {
+          this.hideFrame()
+        }
         break
       }
       case 'SHOW_FRAME':
@@ -117,7 +121,10 @@ export class ShrinkApp {
   }
 
   private togglePicker(): void {
-    if (this.picker.opened) this.closePicker()
-    else this.openPicker()
+    if (this.picker.opened) {
+      this.closePicker()
+      return
+    }
+    this.openPicker()
   }
 }
