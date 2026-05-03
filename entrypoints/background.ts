@@ -36,12 +36,18 @@ async function loadActiveTabs(): Promise<void> {
   const raw = stored[STORAGE_ACTIVE_TABS] as
     | Record<string, PersistedActiveState>
     | undefined
-  if (!raw) return
+  if (!raw) {
+    return
+  }
   for (const [tabIdStr, persisted] of Object.entries(raw)) {
     const tabId = Number(tabIdStr)
-    if (!Number.isFinite(tabId)) continue
+    if (!Number.isFinite(tabId)) {
+      continue
+    }
     const device = devicesById.get(persisted.deviceId)
-    if (!device) continue
+    if (!device) {
+      continue
+    }
     activeByTab.set(tabId, {
       device,
       orientation: persisted.orientation,
@@ -88,7 +94,9 @@ async function loadLastState(): Promise<ActiveState> {
   const device =
     (deviceId ? devicesById.get(deviceId) : undefined) ??
     devicesById.get(DEFAULT_DEVICE_ID)
-  if (!device) throw new Error('Default device not found')
+  if (!device) {
+    throw new Error('Default device not found')
+  }
   return { device, orientation, browserMode }
 }
 
@@ -101,19 +109,56 @@ async function getTabUrl(tabId: number): Promise<string | null> {
   }
 }
 
+const UNSUPPORTED_URL_PREFIXES = [
+  'chrome://',
+  'chrome-extension://',
+  'edge://',
+  'about:',
+  'view-source:',
+  'devtools://',
+  'chrome.google.com/webstore',
+  'chromewebstore.google.com'
+]
+
+function isUnsupportedUrl(url: string | undefined): boolean {
+  if (!url) {
+    return true
+  }
+  return UNSUPPORTED_URL_PREFIXES.some(
+    (prefix) => url.startsWith(prefix) || url.includes(prefix)
+  )
+}
+
+async function flashUnsupportedBadge(tabId: number): Promise<void> {
+  try {
+    await browser.action.setBadgeText({ tabId, text: '!' })
+    await browser.action.setBadgeBackgroundColor({ tabId, color: '#dc2626' })
+    await browser.action.setTitle({
+      tabId,
+      title: "Shrink can't run on this page"
+    })
+    setTimeout(() => {
+      void browser.action.setBadgeText({ tabId, text: '' })
+      void browser.action.setTitle({ tabId, title: '' })
+    }, 2000)
+  } catch {}
+}
+
 async function activate(tabId: number, state: ActiveState): Promise<void> {
   const activator = await getActivator()
-  if (activeByTab.has(tabId)) {
-    await activator.update(tabId, state)
-  } else {
-    await activator.activate(tabId, state)
-  }
+  const apply = activeByTab.has(tabId)
+    ? activator.update.bind(activator)
+    : activator.activate.bind(activator)
+  await apply(tabId, state)
+
   activeByTab.set(tabId, state)
   await persistLast(state)
   await persistActiveTabs()
 
   const url = await getTabUrl(tabId)
-  if (url) await sendToTab(tabId, { type: 'SHOW_FRAME', url, state })
+  if (url) {
+    await sendToTab(tabId, { type: 'SHOW_FRAME', url, state })
+  }
 
   await broadcastState(tabId)
 }
@@ -131,13 +176,19 @@ async function handle(
   msg: Msg,
   sender: Browser.runtime.MessageSender
 ): Promise<MsgResponse> {
-  if (rehydrated) await rehydrated
+  if (rehydrated) {
+    await rehydrated
+  }
   switch (msg.type) {
     case 'CONTENT_ACTIVATE': {
       const tabId = sender.tab?.id
-      if (tabId == null) return { ok: false, error: 'no sender tab' }
+      if (tabId == null) {
+        return { ok: false, error: 'no sender tab' }
+      }
       const device = devicesById.get(msg.deviceId)
-      if (!device) return { ok: false, error: 'unknown device' }
+      if (!device) {
+        return { ok: false, error: 'unknown device' }
+      }
       await activate(tabId, {
         device,
         orientation: msg.orientation,
@@ -148,16 +199,22 @@ async function handle(
 
     case 'CONTENT_DEACTIVATE': {
       const tabId = sender.tab?.id
-      if (tabId == null) return { ok: false, error: 'no sender tab' }
+      if (tabId == null) {
+        return { ok: false, error: 'no sender tab' }
+      }
       await deactivate(tabId)
       return { ok: true }
     }
 
     case 'CONTENT_TOGGLE_ORIENTATION': {
       const tabId = sender.tab?.id
-      if (tabId == null) return { ok: false, error: 'no sender tab' }
+      if (tabId == null) {
+        return { ok: false, error: 'no sender tab' }
+      }
       const current = activeByTab.get(tabId)
-      if (!current) return { ok: false, error: 'tab not active' }
+      if (!current) {
+        return { ok: false, error: 'tab not active' }
+      }
       await activate(tabId, {
         ...current,
         orientation:
@@ -168,27 +225,39 @@ async function handle(
 
     case 'CONTENT_SET_BROWSER': {
       const tabId = sender.tab?.id
-      if (tabId == null) return { ok: false, error: 'no sender tab' }
+      if (tabId == null) {
+        return { ok: false, error: 'no sender tab' }
+      }
       const current = activeByTab.get(tabId)
-      if (!current) return { ok: false, error: 'tab not active' }
+      if (!current) {
+        return { ok: false, error: 'tab not active' }
+      }
       await activate(tabId, { ...current, browserMode: msg.browserMode })
       return { ok: true }
     }
 
     case 'CONTENT_GET_STATE': {
       const tabId = sender.tab?.id
-      if (tabId == null) return { ok: false, error: 'no sender tab' }
+      if (tabId == null) {
+        return { ok: false, error: 'no sender tab' }
+      }
       const state = activeByTab.get(tabId) ?? null
       return { ok: true, state }
     }
 
     case 'CONTENT_READY': {
       const tabId = sender.tab?.id
-      if (tabId == null) return { ok: true }
+      if (tabId == null) {
+        return { ok: true }
+      }
       const state = activeByTab.get(tabId)
-      if (!state) return { ok: true }
+      if (!state) {
+        return { ok: true }
+      }
       const url = await getTabUrl(tabId)
-      if (url) await sendToTab(tabId, { type: 'SHOW_FRAME', url, state })
+      if (url) {
+        await sendToTab(tabId, { type: 'SHOW_FRAME', url, state })
+      }
       await sendToTab(tabId, { type: 'OPEN_SIDEBAR', state })
       return { ok: true }
     }
@@ -212,8 +281,18 @@ export default defineBackground(() => {
 
   browser.action.onClicked.addListener(async (tab) => {
     const tabId = tab.id
-    if (tabId == null) return
-    if (rehydrated) await rehydrated
+    if (tabId == null) {
+      return
+    }
+
+    if (isUnsupportedUrl(tab.url)) {
+      await flashUnsupportedBadge(tabId)
+      return
+    }
+
+    if (rehydrated) {
+      await rehydrated
+    }
 
     const current = activeByTab.get(tabId)
     if (current) {
@@ -237,7 +316,9 @@ export default defineBackground(() => {
   })
 
   browser.tabs.onRemoved.addListener((tabId) => {
-    if (!activeByTab.has(tabId)) return
+    if (!activeByTab.has(tabId)) {
+      return
+    }
     activeByTab.delete(tabId)
     void persistActiveTabs()
     void getActivator().then((a) => a.deactivate(tabId).catch(() => {}))
