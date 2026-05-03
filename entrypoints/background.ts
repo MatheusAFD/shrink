@@ -1,6 +1,7 @@
 import { getActivator } from '@/lib/activator'
 import {
   DEFAULT_DEVICE_ID,
+  STORAGE_ACTIVE_TABS,
   STORAGE_BROWSER_MODE,
   STORAGE_DEVICE_ID,
   STORAGE_ORIENTATION
@@ -9,7 +10,45 @@ import { devicesById } from '@/lib/devices'
 import type { Msg, MsgResponse } from '@/lib/messaging'
 import type { ActiveState, BrowserMode, Orientation } from '@/types'
 
+interface PersistedActiveState {
+  deviceId: string
+  orientation: Orientation
+  browserMode: BrowserMode
+}
+
 const activeByTab = new Map<number, ActiveState>()
+let rehydrated: Promise<void> | null = null
+
+async function persistActiveTabs(): Promise<void> {
+  const serialized: Record<string, PersistedActiveState> = {}
+  for (const [tabId, state] of activeByTab) {
+    serialized[String(tabId)] = {
+      deviceId: state.device.id,
+      orientation: state.orientation,
+      browserMode: state.browserMode
+    }
+  }
+  await browser.storage.session.set({ [STORAGE_ACTIVE_TABS]: serialized })
+}
+
+async function loadActiveTabs(): Promise<void> {
+  const stored = await browser.storage.session.get(STORAGE_ACTIVE_TABS)
+  const raw = stored[STORAGE_ACTIVE_TABS] as
+    | Record<string, PersistedActiveState>
+    | undefined
+  if (!raw) return
+  for (const [tabIdStr, persisted] of Object.entries(raw)) {
+    const tabId = Number(tabIdStr)
+    if (!Number.isFinite(tabId)) continue
+    const device = devicesById.get(persisted.deviceId)
+    if (!device) continue
+    activeByTab.set(tabId, {
+      device,
+      orientation: persisted.orientation,
+      browserMode: persisted.browserMode
+    })
+  }
+}
 
 async function sendToTab(tabId: number, msg: Msg): Promise<void> {
   try {
@@ -71,6 +110,7 @@ async function activate(tabId: number, state: ActiveState): Promise<void> {
   }
   activeByTab.set(tabId, state)
   await persistLast(state)
+  await persistActiveTabs()
 
   const url = await getTabUrl(tabId)
   if (url) await sendToTab(tabId, { type: 'SHOW_FRAME', url, state })
@@ -82,6 +122,7 @@ async function deactivate(tabId: number): Promise<void> {
   const activator = await getActivator()
   await activator.deactivate(tabId)
   activeByTab.delete(tabId)
+  await persistActiveTabs()
   await sendToTab(tabId, { type: 'HIDE_FRAME' })
   await broadcastState(tabId)
 }
@@ -90,6 +131,7 @@ async function handle(
   msg: Msg,
   sender: Browser.runtime.MessageSender
 ): Promise<MsgResponse> {
+  if (rehydrated) await rehydrated
   switch (msg.type) {
     case 'CONTENT_ACTIVATE': {
       const tabId = sender.tab?.id
@@ -157,9 +199,12 @@ async function handle(
 }
 
 export default defineBackground(() => {
+  rehydrated = loadActiveTabs()
+
   void getActivator().then((activator) => {
     activator.onExternalDetach((tabId) => {
       activeByTab.delete(tabId)
+      void persistActiveTabs()
       void sendToTab(tabId, { type: 'HIDE_FRAME' })
       void broadcastState(tabId)
     })
@@ -168,6 +213,7 @@ export default defineBackground(() => {
   browser.action.onClicked.addListener(async (tab) => {
     const tabId = tab.id
     if (tabId == null) return
+    if (rehydrated) await rehydrated
 
     const current = activeByTab.get(tabId)
     if (current) {
@@ -193,6 +239,7 @@ export default defineBackground(() => {
   browser.tabs.onRemoved.addListener((tabId) => {
     if (!activeByTab.has(tabId)) return
     activeByTab.delete(tabId)
+    void persistActiveTabs()
     void getActivator().then((a) => a.deactivate(tabId).catch(() => {}))
   })
 })

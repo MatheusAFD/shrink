@@ -14,10 +14,10 @@ export default defineContentScript({
 
     const app = new ShrinkApp(shadow)
 
-    await browser.runtime.sendMessage({ type: 'CONTENT_READY' } satisfies Msg)
-
     browser.runtime.onMessage.addListener((msg: Msg) => {
       app.handleMessage(msg)
     })
+
+    await browser.runtime.sendMessage({ type: 'CONTENT_READY' } satisfies Msg)
   }
 })
