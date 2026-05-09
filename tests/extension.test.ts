@@ -351,4 +351,165 @@ test.describe('Shrink Extension', () => {
     })
     expect(visible).toBe(false)
   })
+
+  test('second icon click deactivates extension', async ({ context, page }) => {
+    await setup(context, page)
+    await selectFirstDevice(page)
+
+    await page.waitForFunction(
+      () => {
+        const host = document.getElementById('__shrink_root__')
+        return (
+          host?.shadowRoot
+            ?.querySelector('.shrink-root')
+            ?.classList.contains('visible') ?? false
+        )
+      },
+      { timeout: 6_000 }
+    )
+
+    await activateExtension(context, page)
+
+    await page.waitForFunction(
+      () => {
+        const host = document.getElementById('__shrink_root__')
+        return !(
+          host?.shadowRoot
+            ?.querySelector('.shrink-root')
+            ?.classList.contains('visible') ?? true
+        )
+      },
+      { timeout: 6_000 }
+    )
+
+    const visible = await page.evaluate(() => {
+      const host = document.getElementById('__shrink_root__')
+      return (
+        host?.shadowRoot
+          ?.querySelector('.shrink-root')
+          ?.classList.contains('visible') ?? false
+      )
+    })
+    expect(visible).toBe(false)
+  })
+
+  test('picker open state persists across reload', async ({
+    context,
+    page
+  }) => {
+    await setup(context, page)
+    await selectFirstDevice(page)
+
+    await page.waitForFunction(
+      () => {
+        const host = document.getElementById('__shrink_root__')
+        return (
+          host?.shadowRoot
+            ?.querySelector('.shrink-root')
+            ?.classList.contains('visible') ?? false
+        )
+      },
+      { timeout: 6_000 }
+    )
+
+    await clickToolBtn(page, 'Choose device')
+    await page.waitForTimeout(300)
+
+    const openBefore = await page.evaluate(() => {
+      const host = document.getElementById('__shrink_root__')
+      return (
+        host?.shadowRoot
+          ?.querySelector('.picker')
+          ?.classList.contains('open') ?? false
+      )
+    })
+    expect(openBefore).toBe(true)
+
+    await page.reload()
+    await page.waitForLoadState('domcontentloaded')
+
+    await page.waitForFunction(
+      () => {
+        const host = document.getElementById('__shrink_root__')
+        return (
+          host?.shadowRoot
+            ?.querySelector('.shrink-root')
+            ?.classList.contains('visible') ?? false
+        )
+      },
+      { timeout: 6_000 }
+    )
+
+    await page.waitForTimeout(300)
+
+    const openAfter = await page.evaluate(() => {
+      const host = document.getElementById('__shrink_root__')
+      return (
+        host?.shadowRoot
+          ?.querySelector('.picker')
+          ?.classList.contains('open') ?? false
+      )
+    })
+    expect(openAfter).toBe(true)
+  })
+
+  test('picker closed state persists across reload', async ({
+    context,
+    page
+  }) => {
+    await setup(context, page)
+    await selectFirstDevice(page)
+
+    await page.waitForFunction(
+      () => {
+        const host = document.getElementById('__shrink_root__')
+        return (
+          host?.shadowRoot
+            ?.querySelector('.shrink-root')
+            ?.classList.contains('visible') ?? false
+        )
+      },
+      { timeout: 6_000 }
+    )
+
+    const pickerOpen = await page.evaluate(() => {
+      const host = document.getElementById('__shrink_root__')
+      return (
+        host?.shadowRoot
+          ?.querySelector('.picker')
+          ?.classList.contains('open') ?? false
+      )
+    })
+    if (pickerOpen) {
+      await clickToolBtn(page, 'Choose device')
+      await page.waitForTimeout(300)
+    }
+
+    await page.reload()
+    await page.waitForLoadState('domcontentloaded')
+
+    await page.waitForFunction(
+      () => {
+        const host = document.getElementById('__shrink_root__')
+        return (
+          host?.shadowRoot
+            ?.querySelector('.shrink-root')
+            ?.classList.contains('visible') ?? false
+        )
+      },
+      { timeout: 6_000 }
+    )
+
+    await page.waitForTimeout(300)
+
+    const closedAfter = await page.evaluate(() => {
+      const host = document.getElementById('__shrink_root__')
+      return (
+        host?.shadowRoot
+          ?.querySelector('.picker')
+          ?.classList.contains('open') ?? false
+      )
+    })
+    expect(closedAfter).toBe(false)
+  })
 })

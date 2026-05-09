@@ -66,7 +66,9 @@ export class ShrinkApp {
     switch (msg.type) {
       case 'OPEN_SIDEBAR': {
         this.updateState(msg.state)
-        if (!this.activeState) {
+        if (msg.pickerOpen) {
+          this.openPicker()
+        } else if (!this.activeState) {
           this.openPicker()
         }
         break
@@ -113,11 +115,19 @@ export class ShrinkApp {
   private openPicker(): void {
     this.picker.open()
     this.toolbar.setPickerOpen(true)
+    void browser.runtime.sendMessage({
+      type: 'CONTENT_PICKER_STATE',
+      open: true
+    } satisfies Msg)
   }
 
   private closePicker(): void {
     this.picker.close()
     this.toolbar.setPickerOpen(false)
+    void browser.runtime.sendMessage({
+      type: 'CONTENT_PICKER_STATE',
+      open: false
+    } satisfies Msg)
   }
 
   private togglePicker(): void {
