@@ -12,7 +12,8 @@ export type Msg =
   | { type: 'CONTENT_SET_BROWSER'; browserMode: BrowserMode }
   | { type: 'CONTENT_GET_STATE' }
   | { type: 'CONTENT_READY' }
-  | { type: 'OPEN_SIDEBAR'; state: ActiveState | null }
+  | { type: 'OPEN_SIDEBAR'; state: ActiveState | null; pickerOpen?: boolean }
+  | { type: 'CONTENT_PICKER_STATE'; open: boolean }
   | {
       type: 'STATE_CHANGED'
       tabId: number

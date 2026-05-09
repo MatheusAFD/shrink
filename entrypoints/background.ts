@@ -4,7 +4,8 @@ import {
   STORAGE_ACTIVE_TABS,
   STORAGE_BROWSER_MODE,
   STORAGE_DEVICE_ID,
-  STORAGE_ORIENTATION
+  STORAGE_ORIENTATION,
+  STORAGE_PICKER_OPEN
 } from '@/lib/constants/storage'
 import { devicesById } from '@/lib/devices'
 import type { Msg, MsgResponse } from '@/lib/messaging'
@@ -17,6 +18,7 @@ interface PersistedActiveState {
 }
 
 const activeByTab = new Map<number, ActiveState>()
+const pickerOpenByTab = new Map<number, boolean>()
 let rehydrated: Promise<void> | null = null
 
 async function persistActiveTabs(): Promise<void> {
@@ -245,6 +247,18 @@ async function handle(
       return { ok: true, state }
     }
 
+    case 'CONTENT_PICKER_STATE': {
+      const tabId = sender.tab?.id
+      if (tabId == null) {
+        return { ok: true }
+      }
+      pickerOpenByTab.set(tabId, msg.open)
+      await browser.storage.session.set({
+        [`${STORAGE_PICKER_OPEN}.${tabId}`]: msg.open
+      })
+      return { ok: true }
+    }
+
     case 'CONTENT_READY': {
       const tabId = sender.tab?.id
       if (tabId == null) {
@@ -258,7 +272,13 @@ async function handle(
       if (url) {
         await sendToTab(tabId, { type: 'SHOW_FRAME', url, state })
       }
-      await sendToTab(tabId, { type: 'OPEN_SIDEBAR', state })
+      const stored = await browser.storage.session.get(
+        `${STORAGE_PICKER_OPEN}.${tabId}`
+      )
+      const pickerOpen =
+        (stored[`${STORAGE_PICKER_OPEN}.${tabId}`] as boolean | undefined) ??
+        false
+      await sendToTab(tabId, { type: 'OPEN_SIDEBAR', state, pickerOpen })
       return { ok: true }
     }
 
@@ -322,5 +342,7 @@ export default defineBackground(() => {
     activeByTab.delete(tabId)
     void persistActiveTabs()
     void getActivator().then((a) => a.deactivate(tabId).catch(() => {}))
+    pickerOpenByTab.delete(tabId)
+    void browser.storage.session.remove(`${STORAGE_PICKER_OPEN}.${tabId}`)
   })
 })
