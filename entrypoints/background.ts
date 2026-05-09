@@ -296,7 +296,7 @@ export default defineBackground(() => {
 
     const current = activeByTab.get(tabId)
     if (current) {
-      await sendToTab(tabId, { type: 'OPEN_SIDEBAR', state: current })
+      await deactivate(tabId)
       return
     }
 
