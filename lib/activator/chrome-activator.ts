@@ -1,4 +1,4 @@
-import { throttleById } from '@/lib/constants/throttle'
+import { type ThrottlePreset, throttleById } from '@/lib/constants/throttle'
 import { buildUserAgent } from '@/lib/user-agent'
 import type { ActiveState } from '@/types'
 import type { Activator } from './index'
@@ -92,6 +92,9 @@ export class ChromeActivator implements Activator {
         preset.conditions as unknown as Record<string, unknown>
       )
     }
+    await this.send(tabId, 'Network.setCacheDisabled', {
+      cacheDisabled: state.throttle !== 'none'
+    })
   }
 
   private async clearOverrides(tabId: number): Promise<void> {
@@ -108,6 +111,9 @@ export class ChromeActivator implements Activator {
         'Network.emulateNetworkConditions',
         NO_THROTTLE_CONDITIONS as unknown as Record<string, unknown>
       )
+      await this.send(tabId, 'Network.setCacheDisabled', {
+        cacheDisabled: false
+      })
     } catch {}
   }
 
@@ -168,6 +174,24 @@ export class ChromeActivator implements Activator {
     }
     this.stateByTab.set(tabId, state)
     await this.applyOverrides(tabId, state)
+  }
+
+  async updateNetwork(tabId: number, throttle: ThrottlePreset): Promise<void> {
+    const current = this.stateByTab.get(tabId)
+    if (current) {
+      this.stateByTab.set(tabId, { ...current, throttle })
+    }
+    if (!this.attached.has(tabId)) return
+    const preset = throttleById.get(throttle) ?? throttleById.get('none')
+    if (!preset) return
+    await this.send(
+      tabId,
+      'Network.emulateNetworkConditions',
+      preset.conditions as unknown as Record<string, unknown>
+    )
+    await this.send(tabId, 'Network.setCacheDisabled', {
+      cacheDisabled: throttle !== 'none'
+    })
   }
 
   onExternalDetach(handler: (tabId: number) => void): void {

@@ -120,6 +120,9 @@ export class ShrinkApp {
         this.updateState(msg.state)
         this.frame.update(msg.state)
         break
+      case 'RELOAD_FRAME':
+        this.frame.reloadContent()
+        break
     }
   }
 
