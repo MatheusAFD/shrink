@@ -19,4 +19,4 @@ export const Z_INDEX_BACKDROP = 2147483640
 export const Z_INDEX_PICKER = 10
 export const Z_INDEX_BRAND_LABEL = 1
 export const Z_INDEX_SHOT_OVERLAY = 20
-export const Z_INDEX_SHOT_ACTIONS = 21
+export const Z_INDEX_SHOT_ACTIONS = 50

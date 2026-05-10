@@ -1,3 +1,4 @@
+import type { ThrottlePreset } from '@/lib/constants/throttle'
 import type { ActiveState, BrowserMode, Orientation } from '@/types'
 
 export type Msg =
@@ -6,10 +7,12 @@ export type Msg =
       deviceId: string
       orientation: Orientation
       browserMode: BrowserMode
+      throttle: ThrottlePreset
     }
   | { type: 'CONTENT_DEACTIVATE' }
   | { type: 'CONTENT_TOGGLE_ORIENTATION' }
   | { type: 'CONTENT_SET_BROWSER'; browserMode: BrowserMode }
+  | { type: 'CONTENT_SET_THROTTLE'; throttle: ThrottlePreset }
   | { type: 'CONTENT_GET_STATE' }
   | { type: 'CONTENT_READY' }
   | { type: 'OPEN_SIDEBAR'; state: ActiveState | null; pickerOpen?: boolean }
@@ -23,6 +26,7 @@ export type Msg =
   | { type: 'SHOW_FRAME'; url: string; state: ActiveState }
   | { type: 'HIDE_FRAME' }
   | { type: 'UPDATE_FRAME'; state: ActiveState }
+  | { type: 'RELOAD_FRAME' }
   | { type: 'CONTENT_CAPTURE_TAB' }
 
 export type MsgResponse =
