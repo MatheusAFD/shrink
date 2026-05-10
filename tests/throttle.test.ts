@@ -107,7 +107,7 @@ test.describe('Network throttling', () => {
     expect(await readThrottleLabel(page)).toBe('No throttling')
   })
 
-  test('clicking dropdown opens menu with all 5 presets', async ({
+  test('clicking dropdown opens menu with all 4 presets', async ({
     context,
     page
   }) => {
@@ -131,20 +131,18 @@ test.describe('Network throttling', () => {
     })
 
     expect(info.open).toBe(true)
-    expect(info.options).toHaveLength(5)
+    expect(info.options).toHaveLength(4)
     expect(info.options.map((o) => o.id)).toEqual([
       'none',
       'fast-4g',
       'slow-4g',
-      'slow-3g',
-      'offline'
+      'slow-3g'
     ])
     expect(info.options.map((o) => o.label)).toEqual([
       'No throttling',
       'Fast 4G',
       'Slow 4G',
-      'Slow 3G',
-      'Offline'
+      'Slow 3G'
     ])
   })
 
@@ -290,5 +288,94 @@ test.describe('Network throttling', () => {
 
     expect(await readThrottleLabel(page)).toBe('Fast 4G')
     expect(await readActiveOptionId(page)).toBe('fast-4g')
+  })
+
+  test('selecting throttle keeps picker open', async ({ context, page }) => {
+    await setup(context, page)
+    await selectFirstDevice(page)
+    await waitForFrameVisible(page)
+
+    await clickToolBtn(page, 'Choose device')
+    await page.waitForTimeout(250)
+
+    const beforeOpen = await page.evaluate(() => {
+      const host = document.getElementById('__shrink_root__')
+      return (
+        host?.shadowRoot
+          ?.querySelector('.picker')
+          ?.classList.contains('open') ?? false
+      )
+    })
+    expect(beforeOpen).toBe(true)
+
+    await clickThrottleToggle(page)
+    await page.waitForTimeout(100)
+    await clickThrottleOption(page, 'slow-3g')
+    await page.waitForTimeout(500)
+
+    const afterOpen = await page.evaluate(() => {
+      const host = document.getElementById('__shrink_root__')
+      return (
+        host?.shadowRoot
+          ?.querySelector('.picker')
+          ?.classList.contains('open') ?? false
+      )
+    })
+    expect(afterOpen).toBe(true)
+  })
+
+  test('selecting throttle reloads iframe content only', async ({
+    context,
+    page
+  }) => {
+    await setup(context, page)
+    await selectFirstDevice(page)
+    await waitForFrameVisible(page)
+
+    const srcBefore = await page.evaluate(() => {
+      const host = document.getElementById('__shrink_root__')
+      const iframe = host?.shadowRoot?.querySelector(
+        'iframe'
+      ) as HTMLIFrameElement | null
+      return iframe?.src ?? ''
+    })
+    expect(srcBefore).toBeTruthy()
+
+    await page.evaluate(() => {
+      const host = document.getElementById('__shrink_root__')
+      const iframe = host?.shadowRoot?.querySelector(
+        'iframe'
+      ) as HTMLIFrameElement | null
+      ;(window as unknown as { __reloadCount: number }).__reloadCount = 0
+      iframe?.addEventListener('load', () => {
+        ;(window as unknown as { __reloadCount: number }).__reloadCount++
+      })
+    })
+
+    await clickThrottleToggle(page)
+    await page.waitForTimeout(100)
+    await clickThrottleOption(page, 'slow-3g')
+    await page.waitForTimeout(1200)
+
+    const count = await page.evaluate(
+      () => (window as unknown as { __reloadCount: number }).__reloadCount
+    )
+    expect(count).toBeGreaterThanOrEqual(1)
+
+    const toolbarVisible = await page.evaluate(() => {
+      const host = document.getElementById('__shrink_root__')
+      return !!host?.shadowRoot?.querySelector('.toolbar')
+    })
+    expect(toolbarVisible).toBe(true)
+
+    const frameVisible = await page.evaluate(() => {
+      const host = document.getElementById('__shrink_root__')
+      return (
+        host?.shadowRoot
+          ?.querySelector('.shrink-root')
+          ?.classList.contains('visible') ?? false
+      )
+    })
+    expect(frameVisible).toBe(true)
   })
 })
