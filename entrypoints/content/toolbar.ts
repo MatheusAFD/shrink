@@ -1,12 +1,9 @@
-import { THROTTLE_PRESETS, type ThrottlePreset } from '@/lib/constants/throttle'
 import { BROWSER_MODES } from '@/lib/constants/ui'
 import { isSafariUnsupported } from '@/lib/user-agent'
 import type { ActiveState, BrowserMode } from '@/types'
 import {
   ICON_CAMERA,
-  ICON_CHEVRON_DOWN,
   ICON_DEVICES,
-  ICON_NETWORK,
   ICON_REGION,
   ICON_ROTATE,
   ICON_STOP
@@ -15,7 +12,6 @@ import {
 export interface ToolbarCallbacks {
   onTogglePicker: () => void
   onSetBrowser: (mode: BrowserMode) => void
-  onSetThrottle: (preset: ThrottlePreset) => void
   onRotate: () => void
   onStop: () => void
   onScreenshotFrame: () => void
@@ -29,11 +25,6 @@ export class Toolbar {
   private readonly deviceLabel: HTMLElement
   private readonly frameShotBtn: HTMLButtonElement
   private readonly regionShotBtn: HTMLButtonElement
-  private readonly throttleDropdown: HTMLElement
-  private readonly throttleBtn: HTMLButtonElement
-  private readonly throttleLabel: HTMLElement
-  private readonly throttleOptions: Record<ThrottlePreset, HTMLButtonElement>
-  private readonly outsideClickHandler: (ev: Event) => void
 
   constructor(container: HTMLElement, callbacks: ToolbarCallbacks) {
     const toolbar = document.createElement('div')
@@ -58,72 +49,6 @@ export class Toolbar {
       browserGroup.appendChild(btn)
     }
     toolbar.appendChild(browserGroup)
-
-    toolbar.appendChild(createDivider())
-
-    const throttleDropdown = document.createElement('div')
-    throttleDropdown.className = 'throttle-dropdown'
-
-    const throttleBtn = document.createElement('button')
-    throttleBtn.className = 'throttle-btn'
-    throttleBtn.type = 'button'
-    throttleBtn.title = 'Network throttling'
-    const throttleLabel = document.createElement('span')
-    throttleLabel.className = 'throttle-label'
-    throttleLabel.textContent = 'No throttling'
-    throttleBtn.innerHTML = `${ICON_NETWORK}`
-    throttleBtn.appendChild(throttleLabel)
-    throttleBtn.insertAdjacentHTML('beforeend', ICON_CHEVRON_DOWN)
-    throttleDropdown.appendChild(throttleBtn)
-
-    const throttleMenu = document.createElement('div')
-    throttleMenu.className = 'throttle-menu'
-
-    const throttleOptions = {} as Record<ThrottlePreset, HTMLButtonElement>
-    for (const preset of THROTTLE_PRESETS) {
-      const opt = document.createElement('button')
-      opt.className = 'throttle-option'
-      opt.type = 'button'
-      opt.dataset.id = preset.id
-      opt.textContent = preset.label
-      opt.addEventListener('click', (ev) => {
-        ev.stopPropagation()
-        closeThrottleMenu()
-        callbacks.onSetThrottle(preset.id)
-      })
-      throttleOptions[preset.id] = opt
-      throttleMenu.appendChild(opt)
-    }
-    throttleDropdown.appendChild(throttleMenu)
-    toolbar.appendChild(throttleDropdown)
-
-    const closeThrottleMenu = () => {
-      throttleMenu.classList.remove('open')
-      throttleBtn.classList.remove('open')
-    }
-
-    throttleBtn.addEventListener('click', (ev) => {
-      ev.stopPropagation()
-      const willOpen = !throttleMenu.classList.contains('open')
-      throttleMenu.classList.toggle('open', willOpen)
-      throttleBtn.classList.toggle('open', willOpen)
-    })
-
-    const outsideClickHandler = (ev: Event) => {
-      const path =
-        typeof (ev as Event & { composedPath?: () => EventTarget[] })
-          .composedPath === 'function'
-          ? (ev as Event & { composedPath: () => EventTarget[] }).composedPath()
-          : []
-      if (path.includes(throttleDropdown)) return
-      const target = ev.target as Node | null
-      if (target && throttleDropdown.contains(target)) return
-      closeThrottleMenu()
-    }
-    queueMicrotask(() => {
-      const root = container.getRootNode() as ShadowRoot | Document
-      root.addEventListener('click', outsideClickHandler)
-    })
 
     toolbar.appendChild(createDivider())
 
@@ -174,25 +99,15 @@ export class Toolbar {
     this.deviceLabel = deviceLabel
     this.frameShotBtn = frameShotBtn
     this.regionShotBtn = regionShotBtn
-    this.throttleDropdown = throttleDropdown
-    this.throttleBtn = throttleBtn
-    this.throttleLabel = throttleLabel
-    this.throttleOptions = throttleOptions
-    this.outsideClickHandler = outsideClickHandler
   }
 
   updateState(state: ActiveState | null): void {
     const hasState = !!state
     this.frameShotBtn.disabled = !hasState
     this.regionShotBtn.disabled = !hasState
-    this.throttleBtn.disabled = !hasState
 
     if (!state) {
       this.deviceLabel.textContent = ''
-      this.throttleLabel.textContent = 'No throttling'
-      for (const opt of Object.values(this.throttleOptions)) {
-        opt.classList.remove('active')
-      }
       return
     }
 
@@ -214,26 +129,10 @@ export class Toolbar {
       btn.title = safariUnsupported ? 'Safari unavailable on Android' : ''
       btn.disabled = safariUnsupported
     }
-
-    const activePreset =
-      THROTTLE_PRESETS.find((p) => p.id === state.throttle) ??
-      THROTTLE_PRESETS[0]
-    this.throttleLabel.textContent = activePreset.label
-    for (const preset of THROTTLE_PRESETS) {
-      this.throttleOptions[preset.id].classList.toggle(
-        'active',
-        preset.id === state.throttle
-      )
-    }
   }
 
   setPickerOpen(open: boolean): void {
     this.pickerToggleBtn.classList.toggle('active', open)
-  }
-
-  dispose(): void {
-    const root = this.throttleDropdown.getRootNode() as ShadowRoot | Document
-    root.removeEventListener('click', this.outsideClickHandler)
   }
 }
 

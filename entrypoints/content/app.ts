@@ -25,13 +25,11 @@ export class ShrinkApp {
     this.picker = new DevicePicker(shrinkRoot, (device) => {
       const orientation = this.activeState?.orientation ?? 'portrait'
       const browserMode = this.activeState?.browserMode ?? 'chrome'
-      const throttle = this.activeState?.throttle ?? 'none'
       void browser.runtime.sendMessage({
         type: 'CONTENT_ACTIVATE',
         deviceId: device.id,
         orientation,
-        browserMode,
-        throttle
+        browserMode
       } satisfies Msg)
     })
 
@@ -44,12 +42,6 @@ export class ShrinkApp {
         void browser.runtime.sendMessage({
           type: 'CONTENT_SET_BROWSER',
           browserMode
-        } satisfies Msg)
-      },
-      onSetThrottle: (throttle) => {
-        void browser.runtime.sendMessage({
-          type: 'CONTENT_SET_THROTTLE',
-          throttle
         } satisfies Msg)
       },
       onRotate: () => {

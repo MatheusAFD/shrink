@@ -1,14 +1,6 @@
-import { throttleById } from '@/lib/constants/throttle'
 import { buildUserAgent } from '@/lib/user-agent'
 import type { ActiveState } from '@/types'
 import type { Activator } from './index'
-
-const NO_THROTTLE_CONDITIONS = {
-  offline: false,
-  latency: 0,
-  downloadThroughput: -1,
-  uploadThroughput: -1
-} as const
 
 const PROTOCOL_VERSION = '1.3'
 
@@ -54,7 +46,6 @@ export class ChromeActivator implements Activator {
     })
     this.attached.add(tabId)
     await this.send(tabId, 'Page.enable')
-    await this.send(tabId, 'Network.enable')
   }
 
   private async applyOverrides(
@@ -83,15 +74,6 @@ export class ChromeActivator implements Activator {
       enabled: true,
       maxTouchPoints: 5
     })
-
-    const preset = throttleById.get(state.throttle) ?? throttleById.get('none')
-    if (preset) {
-      await this.send(
-        tabId,
-        'Network.emulateNetworkConditions',
-        preset.conditions as unknown as Record<string, unknown>
-      )
-    }
   }
 
   private async clearOverrides(tabId: number): Promise<void> {
@@ -103,11 +85,6 @@ export class ChromeActivator implements Activator {
       await this.send(tabId, 'Emulation.setTouchEmulationEnabled', {
         enabled: false
       })
-      await this.send(
-        tabId,
-        'Network.emulateNetworkConditions',
-        NO_THROTTLE_CONDITIONS as unknown as Record<string, unknown>
-      )
     } catch {}
   }
 
