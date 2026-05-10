@@ -259,6 +259,21 @@ async function handle(
       return { ok: true }
     }
 
+    case 'CONTENT_CAPTURE_TAB': {
+      const windowId = sender.tab?.windowId
+      if (windowId == null) {
+        return { ok: false, error: 'no window' }
+      }
+      try {
+        const dataUrl = await browser.tabs.captureVisibleTab(windowId, {
+          format: 'png'
+        })
+        return { ok: true, dataUrl }
+      } catch (e) {
+        return { ok: false, error: (e as Error).message }
+      }
+    }
+
     case 'CONTENT_READY': {
       const tabId = sender.tab?.id
       if (tabId == null) {

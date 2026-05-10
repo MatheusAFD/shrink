@@ -23,8 +23,10 @@ export type Msg =
   | { type: 'SHOW_FRAME'; url: string; state: ActiveState }
   | { type: 'HIDE_FRAME' }
   | { type: 'UPDATE_FRAME'; state: ActiveState }
+  | { type: 'CONTENT_CAPTURE_TAB' }
 
 export type MsgResponse =
   | { ok: true }
   | { ok: false; error: string }
   | { ok: true; state: ActiveState | null }
+  | { ok: true; dataUrl: string }
