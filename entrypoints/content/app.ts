@@ -2,6 +2,7 @@ import type { Msg } from '@/lib/messaging'
 import type { ActiveState } from '@/types'
 import { FrameView } from './frame'
 import { DevicePicker } from './picker'
+import { ScreenshotController } from './screenshot'
 import { STYLE } from './styles'
 import { Toolbar } from './toolbar'
 
@@ -10,6 +11,7 @@ export class ShrinkApp {
   private readonly picker: DevicePicker
   private readonly toolbar: Toolbar
   private readonly frame: FrameView
+  private readonly screenshot: ScreenshotController
   private activeState: ActiveState | null = null
 
   constructor(shadow: ShadowRoot) {
@@ -51,6 +53,15 @@ export class ShrinkApp {
         void browser.runtime.sendMessage({
           type: 'CONTENT_DEACTIVATE'
         } satisfies Msg)
+      },
+      onScreenshotFrame: () => {
+        this.screenshot.dispose()
+        void this.screenshot.startFrame()
+      },
+      onScreenshotRegion: () => {
+        this.closePicker()
+        this.screenshot.dispose()
+        this.screenshot.startRegion()
       }
     })
 
@@ -60,6 +71,16 @@ export class ShrinkApp {
     shadow.appendChild(shrinkRoot)
 
     this.shrinkRoot = shrinkRoot
+
+    this.screenshot = new ScreenshotController({
+      shrinkRoot,
+      getFrameEl: () => this.frame.el,
+      getState: () => this.activeState,
+      setCapturing: (kind) => {
+        this.shrinkRoot.classList.toggle('capturing-frame', kind === 'frame')
+        this.shrinkRoot.classList.toggle('capturing-region', kind === 'region')
+      }
+    })
   }
 
   handleMessage(msg: Msg): void {
@@ -104,6 +125,7 @@ export class ShrinkApp {
     this.shrinkRoot.classList.remove('visible')
     this.frame.hide()
     this.closePicker()
+    this.screenshot.dispose()
   }
 
   private updateState(state: ActiveState | null): void {

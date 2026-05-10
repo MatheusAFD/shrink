@@ -1,13 +1,21 @@
 import { BROWSER_MODES } from '@/lib/constants/ui'
 import { isSafariUnsupported } from '@/lib/user-agent'
 import type { ActiveState, BrowserMode } from '@/types'
-import { ICON_DEVICES, ICON_ROTATE, ICON_STOP } from './icons'
+import {
+  ICON_CAMERA,
+  ICON_DEVICES,
+  ICON_REGION,
+  ICON_ROTATE,
+  ICON_STOP
+} from './icons'
 
 export interface ToolbarCallbacks {
   onTogglePicker: () => void
   onSetBrowser: (mode: BrowserMode) => void
   onRotate: () => void
   onStop: () => void
+  onScreenshotFrame: () => void
+  onScreenshotRegion: () => void
 }
 
 export class Toolbar {
@@ -15,6 +23,8 @@ export class Toolbar {
   readonly pickerToggleBtn: HTMLButtonElement
   private readonly browserBtns: Record<BrowserMode, HTMLButtonElement>
   private readonly deviceLabel: HTMLElement
+  private readonly frameShotBtn: HTMLButtonElement
+  private readonly regionShotBtn: HTMLButtonElement
 
   constructor(container: HTMLElement, callbacks: ToolbarCallbacks) {
     const toolbar = document.createElement('div')
@@ -49,6 +59,22 @@ export class Toolbar {
     rotateBtn.addEventListener('click', callbacks.onRotate)
     toolbar.appendChild(rotateBtn)
 
+    const frameShotBtn = document.createElement('button')
+    frameShotBtn.className = 'tool-btn'
+    frameShotBtn.type = 'button'
+    frameShotBtn.title = 'Screenshot device'
+    frameShotBtn.innerHTML = `${ICON_CAMERA}<span class="tool-btn-label">Frame</span>`
+    frameShotBtn.addEventListener('click', callbacks.onScreenshotFrame)
+    toolbar.appendChild(frameShotBtn)
+
+    const regionShotBtn = document.createElement('button')
+    regionShotBtn.className = 'tool-btn'
+    regionShotBtn.type = 'button'
+    regionShotBtn.title = 'Screenshot custom area'
+    regionShotBtn.innerHTML = `${ICON_REGION}<span class="tool-btn-label">Region</span>`
+    regionShotBtn.addEventListener('click', callbacks.onScreenshotRegion)
+    toolbar.appendChild(regionShotBtn)
+
     const stopBtn = document.createElement('button')
     stopBtn.className = 'tool-btn danger'
     stopBtn.title = 'Stop simulation'
@@ -71,9 +97,15 @@ export class Toolbar {
     this.pickerToggleBtn = pickerToggleBtn
     this.browserBtns = browserBtns
     this.deviceLabel = deviceLabel
+    this.frameShotBtn = frameShotBtn
+    this.regionShotBtn = regionShotBtn
   }
 
   updateState(state: ActiveState | null): void {
+    const hasState = !!state
+    this.frameShotBtn.disabled = !hasState
+    this.regionShotBtn.disabled = !hasState
+
     if (!state) {
       this.deviceLabel.textContent = ''
       return

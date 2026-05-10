@@ -2,7 +2,9 @@ import { COLORS } from '@/lib/constants/colors'
 import {
   Z_INDEX_BACKDROP,
   Z_INDEX_BRAND_LABEL,
-  Z_INDEX_PICKER
+  Z_INDEX_PICKER,
+  Z_INDEX_SHOT_ACTIONS,
+  Z_INDEX_SHOT_OVERLAY
 } from '@/lib/constants/ui'
 
 export const STYLE = `
@@ -187,4 +189,55 @@ export const STYLE = `
     pointer-events: all;
   }
   .fallback.visible { display: block; }
+
+  .shrink-root.capturing-frame .toolbar,
+  .shrink-root.capturing-frame .picker,
+  .shrink-root.capturing-frame .shot-region,
+  .shrink-root.capturing-frame .shot-dims,
+  .shrink-root.capturing-frame .shot-mask,
+  .shrink-root.capturing-frame .shot-actions,
+  .shrink-root.capturing-region .shot-region,
+  .shrink-root.capturing-region .shot-dims,
+  .shrink-root.capturing-region .shot-mask,
+  .shrink-root.capturing-region .shot-actions {
+    visibility: hidden;
+  }
+  .shrink-root.capturing-frame .shot-overlay,
+  .shrink-root.capturing-region .shot-overlay { cursor: default; }
+
+  .shot-overlay {
+    position: fixed; inset: 0;
+    z-index: ${Z_INDEX_SHOT_OVERLAY};
+    pointer-events: all; cursor: crosshair;
+  }
+  .shot-mask {
+    position: absolute;
+    background: rgba(0,0,0,0.45);
+    pointer-events: none;
+  }
+  .shot-region {
+    position: absolute;
+    border: 1px solid ${COLORS.accent};
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.4);
+    pointer-events: none;
+  }
+  .shot-dims {
+    position: absolute; bottom: -22px; right: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10px; color: ${COLORS.textPrimary};
+    background: rgba(0,0,0,0.75);
+    padding: 2px 6px; border-radius: 4px;
+    white-space: nowrap;
+  }
+  .shot-actions {
+    position: absolute;
+    z-index: ${Z_INDEX_SHOT_ACTIONS};
+    display: flex; align-items: center; gap: 4px;
+    background: rgba(24,24,27,0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid ${COLORS.border};
+    border-radius: 8px; padding: 4px;
+    pointer-events: all;
+  }
+  .shot-actions .tool-btn:hover { background: ${COLORS.border}; color: ${COLORS.textPrimary}; }
 `
