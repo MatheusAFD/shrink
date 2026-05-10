@@ -119,6 +119,7 @@ export const STYLE = `
   }
 
   .toolbar {
+    position: relative;
     display: flex; align-items: center; gap: 6px;
     background: rgba(24,24,27,0.92);
     backdrop-filter: blur(12px);
@@ -127,6 +128,7 @@ export const STYLE = `
     padding: 6px 8px;
     pointer-events: all;
     flex-shrink: 0;
+    z-index: 40;
   }
 
   .tool-divider {
