@@ -119,6 +119,7 @@ export const STYLE = `
   }
 
   .toolbar {
+    position: relative;
     display: flex; align-items: center; gap: 6px;
     background: rgba(24,24,27,0.92);
     backdrop-filter: blur(12px);
@@ -127,6 +128,7 @@ export const STYLE = `
     padding: 6px 8px;
     pointer-events: all;
     flex-shrink: 0;
+    z-index: 40;
   }
 
   .tool-divider {
@@ -145,6 +147,46 @@ export const STYLE = `
   .tool-btn.active { background: ${COLORS.bgSubtle}; color: ${COLORS.textPrimary}; }
   .tool-btn.danger:hover { color: ${COLORS.danger}; background: ${COLORS.bgSubtle}; }
   .tool-btn-label { line-height: 1; font-size: 11px; font-weight: 500; }
+
+  .throttle-dropdown {
+    position: relative; display: flex; align-items: center;
+  }
+  .throttle-btn {
+    all: unset; cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 500; padding: 5px 8px;
+    border-radius: 6px; color: ${COLORS.textMuted};
+    transition: background 120ms, color 120ms;
+    white-space: nowrap; line-height: 0;
+  }
+  .throttle-btn:hover { background: ${COLORS.border}; color: ${COLORS.textPrimary}; }
+  .throttle-btn.open { background: ${COLORS.bgSubtle}; color: ${COLORS.textPrimary}; }
+  .throttle-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .throttle-btn:disabled:hover { background: transparent; color: ${COLORS.textMuted}; }
+  .throttle-label { line-height: 1; font-size: 11px; font-weight: 500; }
+
+  .throttle-menu {
+    position: absolute; top: calc(100% + 6px); left: 0;
+    min-width: 140px;
+    background: rgba(24,24,27,0.98);
+    backdrop-filter: blur(12px);
+    border: 1px solid ${COLORS.border};
+    border-radius: 8px; padding: 4px;
+    display: none; flex-direction: column; gap: 2px;
+    z-index: 30;
+    pointer-events: all;
+  }
+  .throttle-menu.open { display: flex; }
+  .throttle-option {
+    all: unset; cursor: pointer;
+    font-size: 11px; font-weight: 500;
+    padding: 6px 9px; border-radius: 5px;
+    color: ${COLORS.textFaint};
+    transition: background 120ms, color 120ms;
+    white-space: nowrap;
+  }
+  .throttle-option:hover { background: ${COLORS.border}; color: ${COLORS.textPrimary}; }
+  .throttle-option.active { background: ${COLORS.border}; color: ${COLORS.textPrimary}; }
 
   .browser-group { display: flex; align-items: center; gap: 2px; }
   .browser-btn {

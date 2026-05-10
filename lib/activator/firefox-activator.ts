@@ -77,6 +77,9 @@ function buildRules(tabId: number, state: ActiveState): DnrRule[] {
   ]
 }
 
+// Network throttling: not supported on Firefox extensions
+// (declarativeNetRequest can't shape throughput; no debugger API equivalent).
+// state.throttle is intentionally ignored here.
 export class FirefoxActivator implements Activator {
   async activate(tabId: number, state: ActiveState): Promise<void> {
     await browser.declarativeNetRequest.updateDynamicRules({
@@ -97,6 +100,10 @@ export class FirefoxActivator implements Activator {
       removeRuleIds: ruleIdsFor(tabId),
       addRules: buildRules(tabId, state)
     })
+  }
+
+  async updateNetwork(): Promise<void> {
+    // throttle: not supported on Firefox extensions
   }
 
   onExternalDetach(_handler: (tabId: number) => void): void {}

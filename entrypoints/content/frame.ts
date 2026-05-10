@@ -90,6 +90,12 @@ export class FrameView {
     }, 4000)
   }
 
+  reloadContent(): void {
+    const src = this.iframe.src
+    if (!src || src === 'about:blank') return
+    this.iframe.src = src
+  }
+
   hide(): void {
     this.currentState = null
     this.lastOrientation = null
