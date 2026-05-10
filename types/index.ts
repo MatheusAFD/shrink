@@ -1,3 +1,5 @@
+import type { ThrottlePreset } from '@/lib/constants/throttle'
+
 export type Brand =
   | 'Apple'
   | 'Samsung'
@@ -31,4 +33,5 @@ export interface ActiveState {
   device: Device
   orientation: Orientation
   browserMode: BrowserMode
+  throttle: ThrottlePreset
 }
