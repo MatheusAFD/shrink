@@ -1,15 +1,12 @@
 import { getActivator } from '@/lib/activator'
 import {
   DEFAULT_DEVICE_ID,
-  DEFAULT_THROTTLE_PRESET,
   STORAGE_ACTIVE_TABS,
   STORAGE_BROWSER_MODE,
   STORAGE_DEVICE_ID,
   STORAGE_ORIENTATION,
-  STORAGE_PICKER_OPEN,
-  STORAGE_THROTTLE
+  STORAGE_PICKER_OPEN
 } from '@/lib/constants/storage'
-import { type ThrottlePreset, throttleById } from '@/lib/constants/throttle'
 import { devicesById } from '@/lib/devices'
 import type { Msg, MsgResponse } from '@/lib/messaging'
 import type { ActiveState, BrowserMode, Orientation } from '@/types'
@@ -18,7 +15,6 @@ interface PersistedActiveState {
   deviceId: string
   orientation: Orientation
   browserMode: BrowserMode
-  throttle: ThrottlePreset
 }
 
 const activeByTab = new Map<number, ActiveState>()
@@ -31,8 +27,7 @@ async function persistActiveTabs(): Promise<void> {
     serialized[String(tabId)] = {
       deviceId: state.device.id,
       orientation: state.orientation,
-      browserMode: state.browserMode,
-      throttle: state.throttle
+      browserMode: state.browserMode
     }
   }
   await browser.storage.session.set({ [STORAGE_ACTIVE_TABS]: serialized })
@@ -55,14 +50,10 @@ async function loadActiveTabs(): Promise<void> {
     if (!device) {
       continue
     }
-    const throttle = throttleById.has(persisted.throttle)
-      ? persisted.throttle
-      : DEFAULT_THROTTLE_PRESET
     activeByTab.set(tabId, {
       device,
       orientation: persisted.orientation,
-      browserMode: persisted.browserMode,
-      throttle
+      browserMode: persisted.browserMode
     })
   }
 }
@@ -87,8 +78,7 @@ async function persistLast(state: ActiveState) {
   await browser.storage.local.set({
     [STORAGE_DEVICE_ID]: state.device.id,
     [STORAGE_ORIENTATION]: state.orientation,
-    [STORAGE_BROWSER_MODE]: state.browserMode,
-    [STORAGE_THROTTLE]: state.throttle
+    [STORAGE_BROWSER_MODE]: state.browserMode
   })
 }
 
@@ -96,26 +86,20 @@ async function loadLastState(): Promise<ActiveState> {
   const prefs = await browser.storage.local.get([
     STORAGE_DEVICE_ID,
     STORAGE_ORIENTATION,
-    STORAGE_BROWSER_MODE,
-    STORAGE_THROTTLE
+    STORAGE_BROWSER_MODE
   ])
   const deviceId = prefs[STORAGE_DEVICE_ID] as string | undefined
   const orientation =
     (prefs[STORAGE_ORIENTATION] as Orientation | undefined) ?? 'portrait'
   const browserMode =
     (prefs[STORAGE_BROWSER_MODE] as BrowserMode | undefined) ?? 'chrome'
-  const storedThrottle = prefs[STORAGE_THROTTLE] as ThrottlePreset | undefined
-  const throttle =
-    storedThrottle && throttleById.has(storedThrottle)
-      ? storedThrottle
-      : DEFAULT_THROTTLE_PRESET
   const device =
     (deviceId ? devicesById.get(deviceId) : undefined) ??
     devicesById.get(DEFAULT_DEVICE_ID)
   if (!device) {
     throw new Error('Default device not found')
   }
-  return { device, orientation, browserMode, throttle }
+  return { device, orientation, browserMode }
 }
 
 async function getTabUrl(tabId: number): Promise<string | null> {
@@ -207,14 +191,10 @@ async function handle(
       if (!device) {
         return { ok: false, error: 'unknown device' }
       }
-      const throttle = throttleById.has(msg.throttle)
-        ? msg.throttle
-        : DEFAULT_THROTTLE_PRESET
       await activate(tabId, {
         device,
         orientation: msg.orientation,
-        browserMode: msg.browserMode,
-        throttle
+        browserMode: msg.browserMode
       })
       return { ok: true }
     }
@@ -255,22 +235,6 @@ async function handle(
         return { ok: false, error: 'tab not active' }
       }
       await activate(tabId, { ...current, browserMode: msg.browserMode })
-      return { ok: true }
-    }
-
-    case 'CONTENT_SET_THROTTLE': {
-      const tabId = sender.tab?.id
-      if (tabId == null) {
-        return { ok: false, error: 'no sender tab' }
-      }
-      const current = activeByTab.get(tabId)
-      if (!current) {
-        return { ok: false, error: 'tab not active' }
-      }
-      if (!throttleById.has(msg.throttle)) {
-        return { ok: false, error: 'unknown throttle preset' }
-      }
-      await activate(tabId, { ...current, throttle: msg.throttle })
       return { ok: true }
     }
 
