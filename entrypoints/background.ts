@@ -270,7 +270,14 @@ async function handle(
       if (!throttleById.has(msg.throttle)) {
         return { ok: false, error: 'unknown throttle preset' }
       }
-      await activate(tabId, { ...current, throttle: msg.throttle })
+      const next = { ...current, throttle: msg.throttle }
+      const activator = await getActivator()
+      await activator.updateNetwork(tabId, msg.throttle)
+      activeByTab.set(tabId, next)
+      await persistLast(next)
+      await persistActiveTabs()
+      await sendToTab(tabId, { type: 'RELOAD_FRAME' })
+      await broadcastState(tabId)
       return { ok: true }
     }
 

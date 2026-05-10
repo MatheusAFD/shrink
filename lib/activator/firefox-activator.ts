@@ -102,6 +102,10 @@ export class FirefoxActivator implements Activator {
     })
   }
 
+  async updateNetwork(): Promise<void> {
+    // throttle: not supported on Firefox extensions
+  }
+
   onExternalDetach(_handler: (tabId: number) => void): void {}
 }
 
