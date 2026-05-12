@@ -69,7 +69,7 @@ export function InstallSteps() {
         </div>
       </Step>
 
-      <div className="rounded-md border border-accent/25 bg-accent/[0.06] p-4 text-[13px] leading-relaxed text-fg-muted">
+      <div className="rounded-md border border-accent/25 bg-accent/6 p-4 text-[13px] leading-relaxed text-fg-muted">
         <strong className="text-accent">Done.</strong> Open any tab, click the
         Shrink icon, pick a device. Your last device and settings are
         remembered.
