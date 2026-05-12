@@ -1,5 +1,7 @@
 import type { ThrottlePreset } from '@/lib/constants/throttle'
 
+export type ColorScheme = 'auto' | 'light' | 'dark'
+
 export type Brand =
   | 'Apple'
   | 'Samsung'
@@ -34,4 +36,5 @@ export interface ActiveState {
   orientation: Orientation
   browserMode: BrowserMode
   throttle: ThrottlePreset
+  colorScheme: ColorScheme
 }

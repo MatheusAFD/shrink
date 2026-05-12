@@ -1,21 +1,32 @@
 import { THROTTLE_PRESETS, type ThrottlePreset } from '@/lib/constants/throttle'
 import { BROWSER_MODES } from '@/lib/constants/ui'
 import { isSafariUnsupported } from '@/lib/user-agent'
-import type { ActiveState, BrowserMode } from '@/types'
+import type { ActiveState, BrowserMode, ColorScheme } from '@/types'
 import {
   ICON_CAMERA,
   ICON_CHEVRON_DOWN,
   ICON_DEVICES,
+  ICON_MONITOR,
+  ICON_MOON,
   ICON_NETWORK,
   ICON_REGION,
   ICON_ROTATE,
-  ICON_STOP
+  ICON_STOP,
+  ICON_SUN
 } from './icons'
+
+const COLOR_SCHEME_OPTIONS: { id: ColorScheme; label: string; icon: string }[] =
+  [
+    { id: 'auto', label: 'Auto', icon: ICON_MONITOR },
+    { id: 'light', label: 'Light', icon: ICON_SUN },
+    { id: 'dark', label: 'Dark', icon: ICON_MOON }
+  ]
 
 export interface ToolbarCallbacks {
   onTogglePicker: () => void
   onSetBrowser: (mode: BrowserMode) => void
   onSetThrottle: (preset: ThrottlePreset) => void
+  onSetColorScheme: (scheme: ColorScheme) => void
   onRotate: () => void
   onStop: () => void
   onScreenshotFrame: () => void
@@ -33,6 +44,10 @@ export class Toolbar {
   private readonly throttleBtn: HTMLButtonElement
   private readonly throttleLabel: HTMLElement
   private readonly throttleOptions: Record<ThrottlePreset, HTMLButtonElement>
+  private readonly colorSchemeDropdown: HTMLElement
+  private readonly colorSchemeBtn: HTMLButtonElement
+  private readonly colorSchemeLabel: HTMLElement
+  private readonly colorSchemeOptions: Record<ColorScheme, HTMLButtonElement>
   private readonly outsideClickHandler: (ev: Event) => void
 
   constructor(container: HTMLElement, callbacks: ToolbarCallbacks) {
@@ -109,16 +124,72 @@ export class Toolbar {
       throttleBtn.classList.toggle('open', willOpen)
     })
 
+    // color scheme dropdown
+    const colorSchemeDropdown = document.createElement('div')
+    colorSchemeDropdown.className = 'throttle-dropdown'
+
+    const colorSchemeBtn = document.createElement('button')
+    colorSchemeBtn.className = 'throttle-btn'
+    colorSchemeBtn.type = 'button'
+    colorSchemeBtn.title = 'Color scheme'
+    const colorSchemeLabel = document.createElement('span')
+    colorSchemeLabel.className = 'throttle-label'
+    colorSchemeLabel.textContent = 'Auto'
+    colorSchemeBtn.innerHTML = ICON_MONITOR
+    colorSchemeBtn.appendChild(colorSchemeLabel)
+    colorSchemeBtn.insertAdjacentHTML('beforeend', ICON_CHEVRON_DOWN)
+    colorSchemeDropdown.appendChild(colorSchemeBtn)
+
+    const colorSchemeMenu = document.createElement('div')
+    colorSchemeMenu.className = 'throttle-menu'
+
+    const colorSchemeOptions = {} as Record<ColorScheme, HTMLButtonElement>
+    for (const opt of COLOR_SCHEME_OPTIONS) {
+      const btn = document.createElement('button')
+      btn.className = 'throttle-option'
+      btn.type = 'button'
+      btn.dataset.id = opt.id
+      btn.textContent = opt.label
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation()
+        closeColorSchemeMenu()
+        callbacks.onSetColorScheme(opt.id)
+      })
+      colorSchemeOptions[opt.id] = btn
+      colorSchemeMenu.appendChild(btn)
+    }
+    colorSchemeDropdown.appendChild(colorSchemeMenu)
+    toolbar.appendChild(colorSchemeDropdown)
+
+    const closeColorSchemeMenu = () => {
+      colorSchemeMenu.classList.remove('open')
+      colorSchemeBtn.classList.remove('open')
+    }
+
+    colorSchemeBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation()
+      const willOpen = !colorSchemeMenu.classList.contains('open')
+      colorSchemeMenu.classList.toggle('open', willOpen)
+      colorSchemeBtn.classList.toggle('open', willOpen)
+    })
+
     const outsideClickHandler = (ev: Event) => {
       const path =
         typeof (ev as Event & { composedPath?: () => EventTarget[] })
           .composedPath === 'function'
           ? (ev as Event & { composedPath: () => EventTarget[] }).composedPath()
           : []
-      if (path.includes(throttleDropdown)) return
+      if (path.includes(throttleDropdown) || path.includes(colorSchemeDropdown))
+        return
       const target = ev.target as Node | null
-      if (target && throttleDropdown.contains(target)) return
+      if (
+        target &&
+        (throttleDropdown.contains(target) ||
+          colorSchemeDropdown.contains(target))
+      )
+        return
       closeThrottleMenu()
+      closeColorSchemeMenu()
     }
     queueMicrotask(() => {
       const root = container.getRootNode() as ShadowRoot | Document
@@ -178,6 +249,10 @@ export class Toolbar {
     this.throttleBtn = throttleBtn
     this.throttleLabel = throttleLabel
     this.throttleOptions = throttleOptions
+    this.colorSchemeDropdown = colorSchemeDropdown
+    this.colorSchemeBtn = colorSchemeBtn
+    this.colorSchemeLabel = colorSchemeLabel
+    this.colorSchemeOptions = colorSchemeOptions
     this.outsideClickHandler = outsideClickHandler
   }
 
@@ -186,11 +261,19 @@ export class Toolbar {
     this.frameShotBtn.disabled = !hasState
     this.regionShotBtn.disabled = !hasState
     this.throttleBtn.disabled = !hasState
+    this.colorSchemeBtn.disabled = !hasState
 
     if (!state) {
       this.deviceLabel.textContent = ''
       this.throttleLabel.textContent = 'No throttling'
       for (const opt of Object.values(this.throttleOptions)) {
+        opt.classList.remove('active')
+      }
+      this.colorSchemeLabel.textContent = 'Auto'
+      this.colorSchemeBtn.innerHTML = ICON_MONITOR
+      this.colorSchemeBtn.appendChild(this.colorSchemeLabel)
+      this.colorSchemeBtn.insertAdjacentHTML('beforeend', ICON_CHEVRON_DOWN)
+      for (const opt of Object.values(this.colorSchemeOptions)) {
         opt.classList.remove('active')
       }
       return
@@ -225,6 +308,20 @@ export class Toolbar {
         preset.id === state.throttle
       )
     }
+
+    const activeScheme =
+      COLOR_SCHEME_OPTIONS.find((o) => o.id === state.colorScheme) ??
+      COLOR_SCHEME_OPTIONS[0]
+    this.colorSchemeLabel.textContent = activeScheme.label
+    this.colorSchemeBtn.innerHTML = activeScheme.icon
+    this.colorSchemeBtn.appendChild(this.colorSchemeLabel)
+    this.colorSchemeBtn.insertAdjacentHTML('beforeend', ICON_CHEVRON_DOWN)
+    for (const opt of COLOR_SCHEME_OPTIONS) {
+      this.colorSchemeOptions[opt.id].classList.toggle(
+        'active',
+        opt.id === state.colorScheme
+      )
+    }
   }
 
   setPickerOpen(open: boolean): void {
@@ -234,6 +331,7 @@ export class Toolbar {
   dispose(): void {
     const root = this.throttleDropdown.getRootNode() as ShadowRoot | Document
     root.removeEventListener('click', this.outsideClickHandler)
+    this.colorSchemeDropdown.remove()
   }
 }
 

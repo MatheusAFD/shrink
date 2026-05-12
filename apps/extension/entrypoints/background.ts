@@ -1,9 +1,11 @@
 import { getActivator } from '@/lib/activator'
 import {
+  DEFAULT_COLOR_SCHEME,
   DEFAULT_DEVICE_ID,
   DEFAULT_THROTTLE_PRESET,
   STORAGE_ACTIVE_TABS,
   STORAGE_BROWSER_MODE,
+  STORAGE_COLOR_SCHEME,
   STORAGE_DEVICE_ID,
   STORAGE_ORIENTATION,
   STORAGE_PICKER_OPEN,
@@ -12,13 +14,19 @@ import {
 import { type ThrottlePreset, throttleById } from '@/lib/constants/throttle'
 import { devicesById } from '@/lib/devices'
 import type { Msg, MsgResponse } from '@/lib/messaging'
-import type { ActiveState, BrowserMode, Orientation } from '@/types'
+import type {
+  ActiveState,
+  BrowserMode,
+  ColorScheme,
+  Orientation
+} from '@/types'
 
 interface PersistedActiveState {
   deviceId: string
   orientation: Orientation
   browserMode: BrowserMode
   throttle: ThrottlePreset
+  colorScheme: ColorScheme
 }
 
 const activeByTab = new Map<number, ActiveState>()
@@ -32,7 +40,8 @@ async function persistActiveTabs(): Promise<void> {
       deviceId: state.device.id,
       orientation: state.orientation,
       browserMode: state.browserMode,
-      throttle: state.throttle
+      throttle: state.throttle,
+      colorScheme: state.colorScheme
     }
   }
   await browser.storage.session.set({ [STORAGE_ACTIVE_TABS]: serialized })
@@ -58,11 +67,14 @@ async function loadActiveTabs(): Promise<void> {
     const throttle = throttleById.has(persisted.throttle)
       ? persisted.throttle
       : DEFAULT_THROTTLE_PRESET
+    const colorScheme =
+      (persisted.colorScheme as ColorScheme | undefined) ?? DEFAULT_COLOR_SCHEME
     activeByTab.set(tabId, {
       device,
       orientation: persisted.orientation,
       browserMode: persisted.browserMode,
-      throttle
+      throttle,
+      colorScheme
     })
   }
 }
@@ -88,7 +100,8 @@ async function persistLast(state: ActiveState) {
     [STORAGE_DEVICE_ID]: state.device.id,
     [STORAGE_ORIENTATION]: state.orientation,
     [STORAGE_BROWSER_MODE]: state.browserMode,
-    [STORAGE_THROTTLE]: state.throttle
+    [STORAGE_THROTTLE]: state.throttle,
+    [STORAGE_COLOR_SCHEME]: state.colorScheme
   })
 }
 
@@ -97,7 +110,8 @@ async function loadLastState(): Promise<ActiveState> {
     STORAGE_DEVICE_ID,
     STORAGE_ORIENTATION,
     STORAGE_BROWSER_MODE,
-    STORAGE_THROTTLE
+    STORAGE_THROTTLE,
+    STORAGE_COLOR_SCHEME
   ])
   const deviceId = prefs[STORAGE_DEVICE_ID] as string | undefined
   const orientation =
@@ -109,13 +123,16 @@ async function loadLastState(): Promise<ActiveState> {
     storedThrottle && throttleById.has(storedThrottle)
       ? storedThrottle
       : DEFAULT_THROTTLE_PRESET
+  const colorScheme =
+    (prefs[STORAGE_COLOR_SCHEME] as ColorScheme | undefined) ??
+    DEFAULT_COLOR_SCHEME
   const device =
     (deviceId ? devicesById.get(deviceId) : undefined) ??
     devicesById.get(DEFAULT_DEVICE_ID)
   if (!device) {
     throw new Error('Default device not found')
   }
-  return { device, orientation, browserMode, throttle }
+  return { device, orientation, browserMode, throttle, colorScheme }
 }
 
 async function getTabUrl(tabId: number): Promise<string | null> {
@@ -214,7 +231,8 @@ async function handle(
         device,
         orientation: msg.orientation,
         browserMode: msg.browserMode,
-        throttle
+        throttle,
+        colorScheme: msg.colorScheme
       })
       return { ok: true }
     }
@@ -273,6 +291,26 @@ async function handle(
       const next = { ...current, throttle: msg.throttle }
       const activator = await getActivator()
       await activator.updateNetwork(tabId, msg.throttle)
+      activeByTab.set(tabId, next)
+      await persistLast(next)
+      await persistActiveTabs()
+      await sendToTab(tabId, { type: 'RELOAD_FRAME' })
+      await broadcastState(tabId)
+      return { ok: true }
+    }
+
+    case 'CONTENT_SET_COLOR_SCHEME': {
+      const tabId = sender.tab?.id
+      if (tabId == null) {
+        return { ok: false, error: 'no sender tab' }
+      }
+      const current = activeByTab.get(tabId)
+      if (!current) {
+        return { ok: false, error: 'tab not active' }
+      }
+      const next = { ...current, colorScheme: msg.colorScheme }
+      const activator = await getActivator()
+      await activator.updateColorScheme(tabId, msg.colorScheme)
       activeByTab.set(tabId, next)
       await persistLast(next)
       await persistActiveTabs()

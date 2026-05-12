@@ -26,12 +26,14 @@ export class ShrinkApp {
       const orientation = this.activeState?.orientation ?? 'portrait'
       const browserMode = this.activeState?.browserMode ?? 'chrome'
       const throttle = this.activeState?.throttle ?? 'none'
+      const colorScheme = this.activeState?.colorScheme ?? 'auto'
       void browser.runtime.sendMessage({
         type: 'CONTENT_ACTIVATE',
         deviceId: device.id,
         orientation,
         browserMode,
-        throttle
+        throttle,
+        colorScheme
       } satisfies Msg)
     })
 
@@ -50,6 +52,12 @@ export class ShrinkApp {
         void browser.runtime.sendMessage({
           type: 'CONTENT_SET_THROTTLE',
           throttle
+        } satisfies Msg)
+      },
+      onSetColorScheme: (colorScheme) => {
+        void browser.runtime.sendMessage({
+          type: 'CONTENT_SET_COLOR_SCHEME',
+          colorScheme
         } satisfies Msg)
       },
       onRotate: () => {

@@ -1,6 +1,6 @@
 import { type ThrottlePreset, throttleById } from '@/lib/constants/throttle'
 import { buildUserAgent } from '@/lib/user-agent'
-import type { ActiveState } from '@/types'
+import type { ActiveState, ColorScheme } from '@/types'
 import type { Activator } from './index'
 
 const NO_THROTTLE_CONDITIONS = {
@@ -79,6 +79,13 @@ export class ChromeActivator implements Activator {
       userAgent: buildUserAgent(device, browserMode)
     })
 
+    await this.send(tabId, 'Emulation.setEmulatedMedia', {
+      features:
+        state.colorScheme === 'auto'
+          ? []
+          : [{ name: 'prefers-color-scheme', value: state.colorScheme }]
+    })
+
     await this.send(tabId, 'Emulation.setTouchEmulationEnabled', {
       enabled: true,
       maxTouchPoints: 5
@@ -103,6 +110,7 @@ export class ChromeActivator implements Activator {
       await this.send(tabId, 'Emulation.setUserAgentOverride', {
         userAgent: ''
       })
+      await this.send(tabId, 'Emulation.setEmulatedMedia', { features: [] })
       await this.send(tabId, 'Emulation.setTouchEmulationEnabled', {
         enabled: false
       })
@@ -191,6 +199,18 @@ export class ChromeActivator implements Activator {
     )
     await this.send(tabId, 'Network.setCacheDisabled', {
       cacheDisabled: throttle !== 'none'
+    })
+  }
+
+  async updateColorScheme(tabId: number, scheme: ColorScheme): Promise<void> {
+    const current = this.stateByTab.get(tabId)
+    if (current) this.stateByTab.set(tabId, { ...current, colorScheme: scheme })
+    if (!this.attached.has(tabId)) return
+    await this.send(tabId, 'Emulation.setEmulatedMedia', {
+      features:
+        scheme === 'auto'
+          ? []
+          : [{ name: 'prefers-color-scheme', value: scheme }]
     })
   }
 
