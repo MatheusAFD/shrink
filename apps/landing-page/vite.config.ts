@@ -15,7 +15,10 @@ export default defineConfig({
     tailwindcss(),
     tanstackStart({
       srcDirectory: 'src',
-      pages: [{ path: '/', prerender: { enabled: true } }]
+      pages: [
+        { path: '/', prerender: { enabled: true } },
+        { path: '/install', prerender: { enabled: true } }
+      ]
     }),
     viteReact(),
     nitro({
