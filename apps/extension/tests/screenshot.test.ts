@@ -1,7 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 import { activateExtension, expect, test } from './fixtures'
 
-const URL = 'https://google.com'
+const URL = 'https://shrink.mathlab.cc'
 
 async function setup(context: BrowserContext, page: Page) {
   await page.goto(URL)

@@ -1,6 +1,6 @@
 import { activateExtension, expect, test } from './fixtures'
 
-const URL = 'https://google.com'
+const URL = 'https://shrink.mathlab.cc'
 
 async function setup(
   context: import('@playwright/test').BrowserContext,
