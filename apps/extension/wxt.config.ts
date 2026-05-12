@@ -26,7 +26,7 @@ export default defineConfig({
     }
   },
   manifest: ({ browser }) => ({
-    name: 'Shrink',
+    name: 'Shrink - Mobile Device Simulator',
     description:
       'Preview any website as a mobile device. Free and open source.',
     permissions: [
