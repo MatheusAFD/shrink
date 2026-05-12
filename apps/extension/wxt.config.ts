@@ -6,7 +6,7 @@ const CHROMIUM_CANDIDATES = [
   '/Applications/Arc.app/Contents/MacOS/Arc',
   '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
   '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
-  '/Applications/Chromium.app/Contents/MacOS/Chromium'
+  '/Applications/Chromium.app/Contents/MacOS/Chromium',
 ]
 
 function findChromiumBinary(): string | undefined {
@@ -22,8 +22,8 @@ export default defineConfig({
   manifestVersion: 3,
   runner: {
     binaries: {
-      ...(findChromiumBinary() && { chrome: findChromiumBinary() as string })
-    }
+      ...(findChromiumBinary() && { chrome: findChromiumBinary() as string }),
+    },
   },
   manifest: ({ browser }) => ({
     name: 'Shrink - Mobile Device Simulator',
@@ -36,7 +36,7 @@ export default defineConfig({
       ...(browser === 'chrome' ? ['debugger'] : []),
       ...(browser === 'firefox'
         ? ['declarativeNetRequest', 'declarativeNetRequestWithHostAccess']
-        : [])
+        : []),
     ],
     action: {},
     host_permissions: ['<all_urls>'],
@@ -45,9 +45,9 @@ export default defineConfig({
         ? {
             gecko: {
               id: 'shrink@matheusafd.dev',
-              strict_min_version: '121.0'
-            }
+              strict_min_version: '121.0',
+            },
           }
-        : undefined
-  })
+        : undefined,
+  }),
 })
