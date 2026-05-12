@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss' source('./');
 
 @theme {
   --color-bg: oklch(0.13 0.012 240);
@@ -12,8 +12,8 @@
   --color-border: oklch(0.22 0.012 240);
   --color-border-strong: oklch(0.3 0.014 240);
 
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
 
   --shadow-glow: 0 0 60px -10px oklch(0.86 0.16 200 / 0.35);
   --shadow-glow-soft: 0 0 100px -20px oklch(0.86 0.16 200 / 0.25);
@@ -132,7 +132,7 @@
   position: relative;
 
   &::after {
-    content: "";
+    content: '';
     position: absolute;
     inset: 0;
     pointer-events: none;
