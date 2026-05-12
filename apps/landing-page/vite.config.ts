@@ -15,13 +15,10 @@ export default defineConfig({
     tailwindcss(),
     tanstackStart({
       srcDirectory: 'src',
-      spa: {
-        enabled: true,
-        prerender: {
-          outputPath: '/index',
-          crawlLinks: false
-        }
-      }
+      pages: [
+        { path: '/', prerender: { enabled: true } },
+        { path: '/install', prerender: { enabled: true } }
+      ]
     }),
     viteReact(),
     nitro({
