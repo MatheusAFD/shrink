@@ -8,24 +8,13 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
-    }
+      '@': path.resolve(__dirname, './src'),
+    },
   },
   plugins: [
     tailwindcss(),
-    tanstackStart({
-      srcDirectory: 'src',
-      pages: [
-        { path: '/', prerender: { enabled: true } },
-        { path: '/install', prerender: { enabled: true } }
-      ]
-    }),
+    tanstackStart({ srcDirectory: 'src' }),
     viteReact(),
-    nitro({
-      preset: 'node-server',
-      prerender: {
-        autoSubfolderIndex: false
-      }
-    })
-  ]
+    nitro(),
+  ],
 })
