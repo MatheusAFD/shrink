@@ -108,7 +108,7 @@ function RootDocument(): ReactNode {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
       </head>
-      <body>
+      <body style={{ background: '#0a0e12' }}>
         <Outlet />
         <Scripts />
       </body>
