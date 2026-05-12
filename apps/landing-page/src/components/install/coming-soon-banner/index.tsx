@@ -1,3 +1,5 @@
+import { ClockGlyph } from './clock-glyph'
+
 export function ComingSoonBanner() {
   return (
     <div className="flex flex-col items-start justify-between gap-4 rounded-card border border-accent/25 bg-accent/6 px-5 py-4 md:flex-row md:items-center">
@@ -18,25 +20,5 @@ export function ComingSoonBanner() {
         </div>
       </div>
     </div>
-  )
-}
-
-function ClockGlyph() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" />
-      <path
-        d="M12 7v5l3 2"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
   )
 }
