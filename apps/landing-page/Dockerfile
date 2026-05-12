@@ -15,6 +15,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/landing-page/node_modules ./apps/landing-page/node_modules
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY apps/landing-page ./apps/landing-page
+COPY apps/extension/package.json ./apps/extension/package.json
 RUN pnpm --filter @shrink/landing-page build
 
 FROM node:24.15-alpine AS runner
