@@ -1,6 +1,6 @@
 # Shrink
 
-Preview any website as a mobile device — directly in your browser, with zero setup.
+**[shrink.mathlab.cc](https://shrink.mathlab.cc)** — Preview any website as a mobile device — directly in your browser, with zero setup.
 
 ## Why Shrink?
 
