@@ -217,6 +217,8 @@ export const STYLE = `
 
   .screen-inner {
     position: absolute; overflow: hidden;
+    isolation: isolate;
+    transform: translateZ(0);
   }
   .screen-inner iframe {
     display: block; border: 0; width: 100%; height: 100%;
