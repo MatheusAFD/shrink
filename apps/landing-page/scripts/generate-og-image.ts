@@ -36,6 +36,9 @@ async function main() {
       content:
         '*, *::before, *::after { animation: none !important; transition: none !important; }'
     })
+    // wait for fonts to load and layout to settle
+    await page.evaluate(() => document.fonts.ready)
+    await new Promise((r) => setTimeout(r, 1500))
     await page.screenshot({ path: OUT, type: 'png' })
     await browser.close()
     console.log(`og-image saved → ${OUT}`)
