@@ -85,10 +85,12 @@ export function buildFrameStyles(dims: FrameDimensions, scale = 1) {
     borderRadius: `${r}px`,
     boxShadow: `0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.12), 0 24px 64px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.5)`,
     overflow: 'hidden',
+    isolation: 'isolate',
     flexShrink: '0'
   }
 
-  const screenR = Math.max(r - bezelH * 1.2, 6)
+  const screenRTop = Math.max(r - bezelH, 6)
+  const screenRBottom = Math.max(r - bezelH, 6)
   const screen: Record<string, string> = {
     position: 'absolute',
     top: `${bezelTop}px`,
@@ -96,9 +98,10 @@ export function buildFrameStyles(dims: FrameDimensions, scale = 1) {
     right: `${bezelH}px`,
     bottom: `${bezelBottom}px`,
     background: '#000',
-    borderRadius: `${screenR}px`,
+    borderRadius: `${screenRTop}px ${screenRTop}px ${screenRBottom}px ${screenRBottom}px`,
     overflow: 'hidden',
-    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)'
+    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
+    contain: 'paint'
   }
 
   const topBar: Record<string, string> = {

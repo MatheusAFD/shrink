@@ -1,29 +1,26 @@
 {
-  "name": "shrink",
-  "description": "Mobile device simulator browser extension",
+  "name": "shrink-monorepo",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.0.0",
+  "description": "Shrink monorepo — browser extension + landing page",
   "type": "module",
   "scripts": {
-    "dev": "wxt",
-    "dev:arc": "CHROME_PATH=\"/Applications/Arc.app/Contents/MacOS/Arc\" wxt",
-    "dev:firefox": "wxt -b firefox",
-    "build": "wxt build",
-    "build:firefox": "wxt build -b firefox",
-    "zip": "wxt zip",
-    "zip:firefox": "wxt zip -b firefox",
-    "compile": "tsc --noEmit",
+    "dev:ext": "pnpm --filter @shrink/extension dev",
+    "dev:ext:firefox": "pnpm --filter @shrink/extension dev:firefox",
+    "dev:lp": "pnpm --filter @shrink/landing-page dev",
+    "build:ext": "pnpm --filter @shrink/extension build",
+    "build:ext:firefox": "pnpm --filter @shrink/extension build:firefox",
+    "build:lp": "pnpm --filter @shrink/landing-page build",
+    "test": "pnpm --filter @shrink/extension test",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "format": "biome check --write .",
-    "test": "playwright test",
-    "test:ui": "playwright test --ui",
-    "postinstall": "wxt prepare"
+    "format": "biome check --write ."
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.13",
-    "@playwright/test": "^1.59.1",
-    "typescript": "^5.9.3",
-    "wxt": "^0.20.25"
+    "@biomejs/biome": "2.4.13"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
   }
 }
