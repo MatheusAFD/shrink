@@ -1,5 +1,10 @@
 import type { ThrottlePreset } from '@/lib/constants/throttle'
-import type { ActiveState, BrowserMode, Orientation } from '@/types'
+import type {
+  ActiveState,
+  BrowserMode,
+  ColorScheme,
+  Orientation
+} from '@/types'
 
 export type Msg =
   | {
@@ -8,11 +13,13 @@ export type Msg =
       orientation: Orientation
       browserMode: BrowserMode
       throttle: ThrottlePreset
+      colorScheme: ColorScheme
     }
   | { type: 'CONTENT_DEACTIVATE' }
   | { type: 'CONTENT_TOGGLE_ORIENTATION' }
   | { type: 'CONTENT_SET_BROWSER'; browserMode: BrowserMode }
   | { type: 'CONTENT_SET_THROTTLE'; throttle: ThrottlePreset }
+  | { type: 'CONTENT_SET_COLOR_SCHEME'; colorScheme: ColorScheme }
   | { type: 'CONTENT_GET_STATE' }
   | { type: 'CONTENT_READY' }
   | { type: 'OPEN_SIDEBAR'; state: ActiveState | null; pickerOpen?: boolean }

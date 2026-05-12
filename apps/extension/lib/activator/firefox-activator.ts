@@ -1,5 +1,5 @@
 import { buildUserAgent } from '@/lib/user-agent'
-import type { ActiveState } from '@/types'
+import type { ActiveState, ColorScheme } from '@/types'
 import type { Activator } from './index'
 
 const RULE_BASE = 1_000_000
@@ -105,6 +105,12 @@ export class FirefoxActivator implements Activator {
   async updateNetwork(): Promise<void> {
     // throttle: not supported on Firefox extensions
   }
+
+  // color scheme emulation via CDP not available in Firefox extensions
+  async updateColorScheme(
+    _tabId: number,
+    _scheme: ColorScheme
+  ): Promise<void> {}
 
   onExternalDetach(_handler: (tabId: number) => void): void {}
 }

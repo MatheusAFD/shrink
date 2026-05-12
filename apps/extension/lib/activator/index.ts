@@ -1,11 +1,12 @@
 import type { ThrottlePreset } from '@/lib/constants/throttle'
-import type { ActiveState } from '@/types'
+import type { ActiveState, ColorScheme } from '@/types'
 
 export interface Activator {
   activate(tabId: number, state: ActiveState): Promise<void>
   deactivate(tabId: number): Promise<void>
   update(tabId: number, state: ActiveState): Promise<void>
   updateNetwork(tabId: number, throttle: ThrottlePreset): Promise<void>
+  updateColorScheme(tabId: number, scheme: ColorScheme): Promise<void>
   onExternalDetach(handler: (tabId: number) => void): void
 }
 
