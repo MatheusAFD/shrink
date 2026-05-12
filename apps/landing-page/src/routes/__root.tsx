@@ -42,6 +42,7 @@ export const Route = createRootRoute({
       },
       { name: 'theme-color', content: '#0a0e12' },
       { name: 'robots', content: 'index, follow' },
+      { name: 'google-site-verification', content: '5yEEB6qSsVag-FEsgc2L164uzDx5IxqNDnZtuXRcLDY' },
       { title: 'Shrink — preview any site as a phone' },
       {
         name: 'description',
