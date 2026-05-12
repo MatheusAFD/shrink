@@ -1,6 +1,8 @@
 import { motion } from 'motion/react'
 import { PhoneMockup } from '@/components/mockup/phone-mockup'
-import { CtaButtons } from './cta-buttons'
+import { CtaButtons } from '../cta-buttons'
+import { Eyebrow } from './eyebrow'
+import { MetaItem } from './meta-item'
 
 export function Hero() {
   return (
@@ -68,23 +70,5 @@ export function Hero() {
         </motion.div>
       </div>
     </section>
-  )
-}
-
-function Eyebrow() {
-  return (
-    <span className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-accent/25 bg-accent/8 px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-accent">
-      <span className="size-1.5 rounded-full bg-accent shadow-[0_0_8px_var(--color-accent)]" />
-      v0.2 — now with network throttling
-    </span>
-  )
-}
-
-function MetaItem({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className="size-1 rounded-full bg-accent" aria-hidden="true" />
-      {children}
-    </span>
   )
 }
