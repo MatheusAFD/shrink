@@ -314,7 +314,6 @@ async function handle(
       activeByTab.set(tabId, next)
       await persistLast(next)
       await persistActiveTabs()
-      await sendToTab(tabId, { type: 'RELOAD_FRAME' })
       await broadcastState(tabId)
       return { ok: true }
     }
