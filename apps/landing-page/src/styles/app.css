@@ -1,4 +1,4 @@
-@import 'tailwindcss' source('./');
+@import 'tailwindcss';
 
 @theme {
   --color-bg: oklch(0.13 0.012 240);
