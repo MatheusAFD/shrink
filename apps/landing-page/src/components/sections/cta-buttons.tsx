@@ -1,6 +1,7 @@
 import { useRouter } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { ArrowRightIcon, BrowsersIcon, PuzzleIcon } from '@/components/ui/icons'
+import { links } from '@/data/links'
 import { cn } from '@/lib/cn'
 
 type Props = {
@@ -20,13 +21,15 @@ export function CtaButtons({ align = 'left' }: Props) {
     >
       <Button
         as="a"
-        href={installHref}
+        href={links.chromeWebStore}
+        target="_blank"
+        rel="noreferrer"
         variant="primary"
         size="lg"
         leadingIcon={<PuzzleIcon size={16} />}
         trailingIcon={<ArrowRightIcon size={16} />}
       >
-        Install from source
+        Add to Chrome
       </Button>
       <Button
         as="a"
@@ -35,7 +38,7 @@ export function CtaButtons({ align = 'left' }: Props) {
         size="lg"
         leadingIcon={<BrowsersIcon size={16} />}
       >
-        Chrome &amp; Firefox guide
+        Install from source
       </Button>
     </div>
   )

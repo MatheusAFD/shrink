@@ -18,10 +18,10 @@ export function InstallHero() {
       </h1>
 
       <p className="mt-5 max-w-2xl text-base leading-relaxed text-fg-muted md:text-lg">
-        The Chrome Web Store and Firefox Add-ons listings are{' '}
-        <em>coming soon</em>. Until then, building from source takes about a
-        minute — all you need is git, Node.js 22+ and your favourite package
-        manager.
+        Prefer to build it yourself? Shrink is{' '}
+        <em>live on the Chrome Web Store</em>, and the Firefox Add-ons listing
+        is coming soon. Building from source takes about a minute — all you
+        need is git, Node.js 22+ and your favourite package manager.
       </p>
 
       <div className="mt-6 flex flex-wrap gap-4">

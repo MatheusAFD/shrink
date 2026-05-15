@@ -21,11 +21,11 @@ export function InstallCta() {
                 Install
               </p>
               <h2 className="mx-auto mt-3 max-w-2xl font-mono text-3xl tracking-tight text-balance md:text-5xl">
-                Free, forever. Two clicks away.
+                Free, forever. One click away.
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-base text-fg-muted md:text-lg">
-                Available soon on the Chrome Web Store and Firefox Add-ons.
-                Until then, build it from source — it's a one-liner.
+                Live on the Chrome Web Store. Firefox Add-ons coming soon — or
+                build from source in about a minute.
               </p>
               <div className="mt-8 flex justify-center">
                 <CtaButtons align="center" />

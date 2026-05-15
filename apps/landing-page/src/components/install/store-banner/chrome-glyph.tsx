@@ -1,4 +1,4 @@
-export function ClockGlyph() {
+export function ChromeGlyph() {
   return (
     <svg
       width="14"
@@ -8,8 +8,9 @@ export function ClockGlyph() {
       aria-hidden="true"
     >
       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="12" cy="12" r="3.5" stroke="currentColor" strokeWidth="1.6" />
       <path
-        d="M12 7v5l3 2"
+        d="M12 8.5h8M9 14l-4 6.5M15 14l-3 6.5"
         stroke="currentColor"
         strokeWidth="1.6"
         strokeLinecap="round"
